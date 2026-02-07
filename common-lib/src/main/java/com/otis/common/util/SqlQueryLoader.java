@@ -1,4 +1,4 @@
-package com.otis.usersvc.util;
+package com.otis.common.util;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.otis.usersvc.exception.SqlQueryLoadException;
+import com.otis.common.exception.SqlQueryLoadException;
 
 public class SqlQueryLoader {
     private SqlQueryLoader() {

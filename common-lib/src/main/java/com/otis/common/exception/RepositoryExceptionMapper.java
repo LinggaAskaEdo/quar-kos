@@ -1,6 +1,6 @@
-package com.otis.usersvc.exception;
+package com.otis.common.exception;
 
-import com.otis.usersvc.dto.ErrorResponse;
+import com.otis.common.dto.ErrorResponse;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;

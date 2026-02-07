@@ -12,16 +12,17 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import com.otis.usersvc.exception.CreationFailedException;
-import com.otis.usersvc.exception.DataAccessException;
+import com.otis.common.exception.CreationFailedException;
+import com.otis.common.exception.DataAccessException;
+import com.otis.common.preference.DatabaseColumns;
+import com.otis.common.preference.FilterKey;
+import com.otis.common.util.DynamicQueryBuilder;
+import com.otis.common.util.SqlQueryLoader;
 import com.otis.usersvc.model.Role;
 import com.otis.usersvc.model.User;
 import com.otis.usersvc.model.UserProfile;
 import com.otis.usersvc.model.UserWithProfile;
-import com.otis.usersvc.preference.DatabaseColumns;
 import com.otis.usersvc.util.DtoMapper;
-import com.otis.usersvc.util.DynamicQueryBuilder;
-import com.otis.usersvc.util.SqlQueryLoader;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -191,15 +192,15 @@ public class UserRepository {
                 DatabaseColumns.CREATED_AT);
 
         // Apply filters
-        if (filters.containsKey(DatabaseColumns.USERNAME)) {
+        if (filters.containsKey(FilterKey.USERNAME)) {
             queryBuilder.where(DatabaseColumns.USERNAME, "ILIKE", "%" + filters.get("username") + "%");
         }
 
-        if (filters.containsKey(DatabaseColumns.EMAIL)) {
+        if (filters.containsKey(FilterKey.EMAIL)) {
             queryBuilder.where(DatabaseColumns.EMAIL, "ILIKE", "%" + filters.get("email") + "%");
         }
 
-        if (filters.containsKey(DatabaseColumns.ID)) {
+        if (filters.containsKey(FilterKey.ID)) {
             queryBuilder.where(DatabaseColumns.ID, "=", UUID.fromString(filters.get("id")));
         }
 

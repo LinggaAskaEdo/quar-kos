@@ -1,4 +1,4 @@
-package com.otis.usersvc.exception;
+package com.otis.common.exception;
 
 public class DataAccessException extends RepositoryException {
     public DataAccessException(String message, Throwable cause) {

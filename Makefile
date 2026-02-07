@@ -1,6 +1,7 @@
 # Variables
 MAVEN := mvn
-SERVICES := order-service user-service
+MODULES := common-lib user-service order-service
+SERVICES := user-service order-service
 
 # Native build options
 NATIVE_OPTS := -Dnative -Dquarkus.native.enabled=true -Dquarkus.native.native-image-xmx=4g -DskipTests
@@ -12,10 +13,10 @@ NATIVE_OPTS := -Dnative -Dquarkus.native.enabled=true -Dquarkus.native.native-im
 # Clean all services
 clean-all:
 	@echo "🧹 Cleaning services..."
-	@for service in $(SERVICES); do \
+	@for service in $(MODULES); do \
 		if [ -d "$$service" ]; then \
 			echo "  Cleaning $$service..."; \
-			cd $$service && $(MAVEN) clean; \
+			(cd $$service && $(MAVEN) clean); \
 		fi \
 	done
 
@@ -27,23 +28,31 @@ clean-order:
 	@echo "Cleaning order-service..."
 	cd order-service && $(MAVEN) clean
 
+clean-common:
+	@echo "Cleaning common-lib..."
+	cd common-lib && $(MAVEN) clean
+
 # Build JVM versions
 build-all:
 	@echo "🔨 Building services (JVM)..."
-	@for service in $(SERVICES); do \
+	@for service in $(MODULES); do \
 		if [ -d "$$service" ]; then \
 			echo "  Building $$service..."; \
-			cd $$service && $(MAVEN) clean package -DskipTests; \
+			(cd $$service && $(MAVEN) clean install -DskipTests); \
 		fi \
 	done
 
 build-user:
 	@echo "🔨 Building user-service (JVM)..."
-	cd user-service && $(MAVEN) clean package -DskipTests
+	cd user-service && $(MAVEN) clean install -DskipTests
 
 build-order:
 	@echo "🔨 Building order-service (JVM)..."
-	cd order-service && $(MAVEN) clean package -DskipTests
+	cd order-service && $(MAVEN) clean install -DskipTests
+
+build-common:
+	@echo "🔨 Building common library (JVM)..."
+	cd common-lib && $(MAVEN) clean install -DskipTests
 
 # Build native executables
 build-native-all:
@@ -51,7 +60,7 @@ build-native-all:
 	@for service in $(SERVICES); do \
 		if [ -d "$$service" ]; then \
 			echo "  Building $$service..."; \
-			cd $$service && $(MAVEN) clean package $(NATIVE_OPTS); \
+			(cd $$service && $(MAVEN) clean package $(NATIVE_OPTS)); \
 		fi \
 	done
 
@@ -69,7 +78,7 @@ run-all:
 	@echo "Start each service in separate terminal:"
 	@for service in $(SERVICES); do \
 		if [ -d "$$service" ]; then \
-			echo "  $$service: cd $$service && java -jar target/quarkus-app/quarkus-run.jar"; \
+			echo "  $$service: (cd $$service && java -jar target/quarkus-app/quarkus-run.jar)"; \
 		fi \
 	done
 
@@ -88,7 +97,7 @@ run-native-all:
 	@for service in $(SERVICES); do \
 		if [ -d "$$service" ]; then \
 			if ls $$service/target/*-runner 1>/dev/null 2>&1; then \
-				echo "  $$service: cd $$service && ./target/*-runner"; \
+				echo "  $$service: (cd $$service && ./target/*-runner)"; \
 			else \
 				echo "  $$service: No native executable found. Run 'make build-native-all' first."; \
 			fi \
@@ -97,11 +106,11 @@ run-native-all:
 
 run-native-user:
 	@echo "⚡ Running user-service native executables..."
-	cd user-service && ./target/*-runner"
+	cd user-service && ./target/*-runner
 
 run-native-order:
 	@echo "⚡ Running order-service native executables..."
-	cd order-service && ./target/*-runner"
+	cd order-service && ./target/*-runner
 
 # ===== Help =====
 help:

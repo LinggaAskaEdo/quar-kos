@@ -1,4 +1,4 @@
-package com.otis.usersvc.util;
+package com.otis.common.util;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package com.otis.usersvc.exception;
+package com.otis.common.exception;
 
 public class CreationFailedException extends RepositoryException {
     public CreationFailedException(String entityName) {

@@ -1,4 +1,4 @@
-package com.otis.usersvc.exception;
+package com.otis.common.exception;
 
 public class SqlQueryLoadException extends RuntimeException {
     public SqlQueryLoadException(String message) {

@@ -1,7 +1,10 @@
 {
   "editor.formatOnSave": true,
-  "java.configuration.updateBuildConfiguration": "automatic",
   "[java]": {
     "editor.defaultFormatter": "redhat.java"
-  }
+  },
+  "java.project.sourcePaths": ["src/main/java"],
+  "java.project.outputPath": "target/classes",
+  "java.project.referencedLibraries": ["target/**/*.jar", "lib/**/*.jar"],
+  "java.configuration.updateBuildConfiguration": "automatic"
 }

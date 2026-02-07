@@ -1,6 +1,6 @@
 quarkus:
   http:
-    port: 8082
+    port: 8081
 
   # Database Configuration
   datasource:
@@ -8,7 +8,7 @@ quarkus:
     username: postgres
     password: ${POSTGRES_DOCKER_PASSWORD}
     jdbc:
-      url: jdbc:postgresql://localhost:5432/quar-kos-userdb
+      url: jdbc:postgresql://localhost:5432/quar-kos-orderdb
       max-size: 16
 
   # Flyway Configuration
@@ -27,14 +27,16 @@ kafka:
     servers: localhost:9092
 mp:
   messaging:
-    outgoing:
+    incoming:
       user-events:
         connector: smallrye-kafka
         topic: user-events
         value:
-          serializer: org.apache.kafka.common.serialization.StringSerializer
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        group:
+          id: order-service-group
 
   # Logging
   log:
     level: INFO
-    category."com.otis.usersvc".level: DEBUG
+    category."com.otis.ordersvc".level: DEBUG

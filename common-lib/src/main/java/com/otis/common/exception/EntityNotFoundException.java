@@ -1,4 +1,4 @@
-package com.otis.usersvc.exception;
+package com.otis.common.exception;
 
 public class EntityNotFoundException extends RepositoryException {
     private final String entityName;

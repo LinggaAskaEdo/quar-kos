@@ -1,4 +1,4 @@
-package com.otis.usersvc.dto;
+package com.otis.common.dto;
 
 public class ErrorResponse {
     private final String message;
