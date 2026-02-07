@@ -1,0 +1,40 @@
+quarkus:
+  http:
+    port: 8082
+
+  # Database Configuration
+  datasource:
+    db-kind: postgresql
+    username: postgres
+    password: ${POSTGRES_DOCKER_PASSWORD}
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/quar-kos-userdb
+      max-size: 16
+
+  # Flyway Configuration
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+    migrate-at-start: true
+
+  # Native
+  native:
+    enabled: false
+
+# Kafka Configuration
+kafka:
+  bootstrap:
+    servers: localhost:9092
+mp:
+  messaging:
+    outgoing:
+      user-events:
+        connector: smallrye-kafka
+        topic: user-events
+        value:
+          serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  # Logging
+  log:
+    level: INFO
+    category."com.example".level: DEBUG
