@@ -1,7 +1,11 @@
 {
   "editor.formatOnSave": true,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": false,
+  "editor.detectIndentation": false,
   "[java]": {
-    "editor.defaultFormatter": "redhat.java"
+    "editor.defaultFormatter": "redhat.java",
+    "editor.tabSize": 4
   },
   "java.project.sourcePaths": ["src/main/java"],
   "java.project.outputPath": "target/classes",

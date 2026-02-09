@@ -11,18 +11,17 @@ public class UserEventConsumer {
 
     @Incoming("user-events")
     public void consumeUserEvent(String message) {
-        // Extract correlation ID from the message
         String correlationId = extractCorrelationId(message);
 
         LOG.infof("[%s] Received user event: %s", correlationId, message);
 
-        // Parse and process the event
         if (message.contains("USER_CREATED")) {
             LOG.infof("[%s] Processing USER_CREATED event", correlationId);
-            // Could create initial order data, send welcome offer, etc.
+            // TODO Could create initial order data, send welcome offer, etc.
+
         } else if (message.contains("USER_PROFILE_CREATED")) {
             LOG.infof("[%s] Processing USER_PROFILE_CREATED event", correlationId);
-            // Could personalize product recommendations, etc.
+            // TODO Could personalize product recommendations, etc.
         }
     }
 

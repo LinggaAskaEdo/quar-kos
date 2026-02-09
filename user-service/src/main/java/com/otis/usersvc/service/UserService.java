@@ -31,17 +31,26 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
+        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+        LOG.infof("[%s] Getting all users", correlationId);
+
         return userRepository.findAll();
     }
 
     public Optional<User> getUserById(UUID id) {
+        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+        LOG.infof("[%s] Getting user by id: %s", correlationId, id);
+
         return userRepository.findById(id);
     }
 
     @Transactional
     public User createUser(String username, String email) {
+        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+        LOG.infof("[%s] Creating user: %s", correlationId, username);
+
         User user = userRepository.create(username, email);
-        eventProducer.sendUserCreatedEvent(user.getId(), user.getUsername(), user.getEmail());
+        eventProducer.sendUserCreatedEvent(correlationId, user.getId(), user.getUsername(), user.getEmail());
 
         return user;
     }
@@ -52,18 +61,27 @@ public class UserService {
 
     @Transactional
     public UserProfile createUserProfile(UUID userId, String firstName, String lastName, String phone, String address) {
+        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+        LOG.infof("[%s] Creating profile for user: %s", correlationId, userId);
+
         UserProfile profile = userRepository.createProfile(userId, firstName, lastName, phone, address);
-        eventProducer.sendUserProfileCreatedEvent(userId, firstName, lastName);
+        eventProducer.sendUserProfileCreatedEvent(correlationId, userId, firstName, lastName);
 
         return profile;
     }
 
     public List<Role> getUserRoles(UUID userId) {
+        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+        LOG.infof("[%s] Getting roles for user: %s", correlationId, userId);
+
         return userRepository.findRolesByUserId(userId);
     }
 
     @Transactional
-    public void assignRole(Long userId, Long roleId) {
+    public void assignRole(UUID userId, UUID roleId) {
+        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+        LOG.infof("[%s] Assigning role %s to user %s", correlationId, roleId, userId);
+
         userRepository.assignRoleToUser(userId, roleId);
     }
 

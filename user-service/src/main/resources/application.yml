@@ -4,11 +4,11 @@ quarkus:
 
   # Database Configuration
   datasource:
-    db-kind: postgresql
-    username: postgres
+    db-kind: "postgresql"
+    username: "postgres"
     password: ${POSTGRES_DOCKER_PASSWORD}
     jdbc:
-      url: jdbc:postgresql://localhost:5432/quar-kos-userdb
+      url: "jdbc:postgresql://localhost:5432/quar-kos-userdb"
       max-size: 16
 
   # Flyway Configuration
@@ -20,21 +20,35 @@ quarkus:
   # Native
   native:
     enabled: false
+    enable-reports: true
+
+  index-dependency:
+    common:
+      group-id: "com.otis"
+      artifact-id: "common-lib"
+      classifier:
 
 # Kafka Configuration
 kafka:
   bootstrap:
-    servers: localhost:9092
+    servers: "localhost:9092"
+
 mp:
   messaging:
     outgoing:
       user-events:
-        connector: smallrye-kafka
-        topic: user-events
+        connector: "smallrye-kafka"
+        topic: "user-events"
         value:
-          serializer: org.apache.kafka.common.serialization.StringSerializer
+          serializer: "org.apache.kafka.common.serialization.StringSerializer"
 
   # Logging
   log:
-    level: INFO
-    category."com.otis.usersvc".level: DEBUG
+    level: "INFO"
+    category:
+      "com.otis.usersvc":
+        level: "DEBUG"
+      "io.quarkus.arc":
+        level: "DEBUG"
+      "org.jboss.resteasy.reactive":
+        level: "DEBUG"

@@ -1,27 +1,35 @@
 package com.otis.common.exception;
 
+import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
+
 import com.otis.common.dto.ErrorResponse;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
 
-@Provider
-public class RepositoryExceptionMapper implements ExceptionMapper<RepositoryException> {
-    @Override
-    public Response toResponse(RepositoryException exception) {
-        if (exception instanceof EntityNotFoundException) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorResponse(exception.getMessage()))
-                    .build();
-        } else if (exception instanceof CreationFailedException) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse(exception.getMessage()))
-                    .build();
-        } else {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("An internal server error occurred"))
-                    .build();
-        }
-    }
+@ApplicationScoped
+@RegisterForReflection
+public class RepositoryExceptionMapper {
+	@ServerExceptionMapper
+	public Response handleRepositoryException(RepositoryException exception) {
+		String causeMessage = exception.getCause() != null ? exception.getCause().toString() : "Unknown cause";
+
+		if (exception instanceof EntityNotFoundException) {
+			return Response
+					.status(Response.Status.NOT_FOUND)
+					.entity(new ErrorResponse(exception.getMessage(), causeMessage))
+					.build();
+		} else if (exception instanceof CreationFailedException) {
+			return Response
+					.status(Response.Status.BAD_REQUEST)
+					.entity(new com.otis.common.dto.ErrorResponse(exception.getMessage(), causeMessage))
+					.build();
+		} else {
+			return Response
+					.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(new ErrorResponse("An internal server error occurred", causeMessage))
+					.build();
+		}
+	}
 }
