@@ -19,7 +19,17 @@ quarkus:
 
   # Native
   native:
-    enabled: false
+    additional-build-args:
+      - -H:+ReportExceptionStackTraces
+      - -H:+AddAllCharsets
+      - -H:IncludeResources=sql/.*\.sql
+
+  # Common Dependency
+  index-dependency:
+    common:
+      group-id: "com.otis"
+      artifact-id: "common-lib"
+      classifier:
 
 # Kafka Configuration
 kafka:
@@ -38,5 +48,11 @@ mp:
 
   # Logging
   log:
-    level: INFO
-    category."com.otis.ordersvc".level: DEBUG
+    level: "INFO"
+    category:
+      "com.otis.usersvc":
+        level: "DEBUG"
+      "io.quarkus.arc":
+        level: "DEBUG"
+      "org.jboss.resteasy.reactive":
+        level: "DEBUG"

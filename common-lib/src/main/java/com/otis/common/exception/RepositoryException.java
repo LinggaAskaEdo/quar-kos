@@ -1,11 +1,14 @@
 package com.otis.common.exception;
 
-public class RepositoryException extends RuntimeException {
-    public RepositoryException(String message) {
-        super(message);
-    }
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-    public RepositoryException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@RegisterForReflection
+public class RepositoryException extends RuntimeException {
+	public RepositoryException(String message) {
+		super(message);
+	}
+
+	public RepositoryException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

@@ -1,11 +1,14 @@
 package com.otis.common.exception;
 
-public class KafkaException extends RuntimeException {
-    public KafkaException(String message) {
-        super(message);
-    }
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-    public KafkaException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@RegisterForReflection
+public class KafkaException extends RuntimeException {
+	public KafkaException(String message) {
+		super(message);
+	}
+
+	public KafkaException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

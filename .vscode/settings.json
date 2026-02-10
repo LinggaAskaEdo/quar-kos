@@ -10,5 +10,9 @@
   "java.project.sourcePaths": ["src/main/java"],
   "java.project.outputPath": "target/classes",
   "java.project.referencedLibraries": ["target/**/*.jar", "lib/**/*.jar"],
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "yaml.schemas": {
+    "microprofile://schema/file%3A///home/lingga/Workspaces/Java/quar-kos/user-service/src/main/resources/application.yml": false
+  },
+  "yaml.validate": false
 }

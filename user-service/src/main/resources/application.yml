@@ -19,9 +19,12 @@ quarkus:
 
   # Native
   native:
-    enabled: false
-    enable-reports: true
+    additional-build-args:
+      - -H:+ReportExceptionStackTraces
+      - -H:+AddAllCharsets
+      - -H:IncludeResources=sql/.*\.sql
 
+  # Common Dependency
   index-dependency:
     common:
       group-id: "com.otis"

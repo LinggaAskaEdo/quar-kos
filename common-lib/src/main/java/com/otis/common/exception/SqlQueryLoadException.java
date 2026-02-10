@@ -1,11 +1,14 @@
 package com.otis.common.exception;
 
-public class SqlQueryLoadException extends RuntimeException {
-    public SqlQueryLoadException(String message) {
-        super(message);
-    }
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-    public SqlQueryLoadException(String message, Throwable cause) {
-        super(message, cause);
-    }
+@RegisterForReflection
+public class SqlQueryLoadException extends RuntimeException {
+	public SqlQueryLoadException(String message) {
+		super(message);
+	}
+
+	public SqlQueryLoadException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
