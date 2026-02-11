@@ -2,69 +2,106 @@ package com.otis.ordersvc.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.jboss.logging.Logger;
 
+import com.otis.common.util.CorrelationIdFilter;
+import com.otis.ordersvc.dto.OrderDTO;
 import com.otis.ordersvc.dto.OrderItemRequest;
-import com.otis.ordersvc.model.Order;
-import com.otis.ordersvc.model.Product;
+import com.otis.ordersvc.dto.ProductDTO;
 import com.otis.ordersvc.repository.OrderRepository;
-import com.otis.ordersvc.util.CorrelationIdFilter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class OrderService {
-    private static final Logger LOG = Logger.getLogger(OrderService.class);
+	private static final Logger LOG = Logger.getLogger(OrderService.class);
 
-    private final OrderRepository orderRepository;
+	private final OrderRepository orderRepository;
 
-    public OrderService(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
+	public OrderService(OrderRepository orderRepository) {
+		this.orderRepository = orderRepository;
+	}
 
-    public List<Order> getAllOrders() {
-        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
-        LOG.infof("[%s] Getting all orders", correlationId);
+	public List<OrderDTO> getAllOrders() {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting all orders", correlationId);
 
-        return orderRepository.findAll();
-    }
+		return orderRepository.findAll();
+	}
 
-    @Transactional
-    public Order createOrder(UUID userId, String username, List<OrderItemRequest> itemRequests) {
-        UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
-        LOG.infof("[%s] Creating order for user: %s", correlationId, username);
+	public Optional<OrderDTO> getOrderById(UUID id) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting order by id: %s", correlationId, id);
 
-        // Calculate total amount
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        for (OrderItemRequest itemReq : itemRequests) {
-            Optional<Product> product = orderRepository.findProductById(itemReq.getProductId());
-            if (product.isPresent()) {
-                BigDecimal itemTotal = product.get().getPrice()
-                        .multiply(new BigDecimal(itemReq.getQuantity()));
-                totalAmount = totalAmount.add(itemTotal);
-            }
-        }
+		return orderRepository.findById(id);
+	}
 
-        // Create order with correlation ID
-        Order order = orderRepository.create(userId, username, totalAmount, "PENDING", correlationId);
+	public List<OrderDTO> getOrdersByUserId(UUID userId) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting orders for user: %s", correlationId, userId);
+		return orderRepository.findByUserId(userId);
+	}
 
-        // Create order items
-        for (OrderItemRequest itemReq : itemRequests) {
-            Optional<Product> product = orderRepository.findProductById(itemReq.getProductId());
-            if (product.isPresent()) {
-                orderRepository.createOrderItem(
-                        order.getId(),
-                        itemReq.getProductId(),
-                        itemReq.getQuantity(),
-                        product.get().getPrice());
-            }
-        }
+	@Transactional
+	public OrderDTO createOrder(UUID userId, String username, List<OrderItemRequest> itemRequests) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Creating order for user: %s", correlationId, username);
 
-        LOG.infof("[%s] Order created successfully: %s", correlationId, order.getId());
-        return orderRepository.findById(order.getId()).orElseThrow();
-    }
+		// Calculate total amount
+		BigDecimal totalAmount = BigDecimal.ZERO;
+		for (OrderItemRequest itemReq : itemRequests) {
+			Optional<ProductDTO> product = orderRepository.findProductById(itemReq.getProductId());
+			if (product.isPresent()) {
+				BigDecimal itemTotal = product.get().price().multiply(new BigDecimal(itemReq.getQuantity()));
+				totalAmount = totalAmount.add(itemTotal);
+			}
+		}
+
+		// Create order with correlation ID
+		OrderDTO order = orderRepository.create(userId, username, totalAmount, "PENDING", correlationId);
+
+		// Create order items
+		for (OrderItemRequest itemReq : itemRequests) {
+			Optional<ProductDTO> product = orderRepository.findProductById(itemReq.getProductId());
+			if (product.isPresent()) {
+				orderRepository.createOrderItem(
+						order.id(),
+						itemReq.getProductId(),
+						itemReq.getQuantity(),
+						product.get().name(),
+						product.get().description(),
+						product.get().price());
+			}
+		}
+
+		LOG.infof("[%s] Order created successfully: %s", correlationId, order.id());
+		return orderRepository.findById(order.id()).orElseThrow();
+	}
+
+	public List<ProductDTO> getAllProducts() {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting all products", correlationId);
+
+		return orderRepository.findAllProducts();
+	}
+
+	public Optional<ProductDTO> getProductById(UUID id) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting product by id: %s", correlationId, id);
+
+		return orderRepository.findProductById(id);
+	}
+
+	public List<OrderDTO> searchOrders(Map<String, String> filters, String sortBy, String sortDirection,
+			Integer limit, Integer offset) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Searching orders with filters: %s", correlationId, filters);
+
+		return orderRepository.findByFilters(filters, sortBy, sortDirection, limit, offset);
+	}
 }

@@ -18,33 +18,33 @@ import com.otis.common.preference.DatabaseColumns;
 import com.otis.common.preference.FilterKey;
 import com.otis.common.util.DynamicQueryBuilder;
 import com.otis.common.util.SqlQueryLoader;
-import com.otis.usersvc.model.Role;
-import com.otis.usersvc.model.User;
-import com.otis.usersvc.model.UserProfile;
-import com.otis.usersvc.model.UserWithProfile;
+import com.otis.usersvc.dto.RoleDTO;
+import com.otis.usersvc.dto.UserDTO;
+import com.otis.usersvc.dto.UserProfileDTO;
+import com.otis.usersvc.dto.UserWithProfileDTO;
 import com.otis.usersvc.util.DtoMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class UserRepository {
+	private static final String QUERY_FILE = "user-queries.sql";
+
 	private final DataSource dataSource;
 
 	public UserRepository(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
-	private static final String QUERY_FILE = "user-queries.sql";
-
-	public List<User> findAll() {
+	public List<UserDTO> findAll() {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findAllUsers");
-		List<User> users = new ArrayList<>();
+		List<UserDTO> users = new ArrayList<>();
 
 		try (Connection conn = dataSource.getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = stmt.executeQuery()) {
 			while (rs.next()) {
-				users.add(DtoMapper.mapToUser(rs));
+				users.add(DtoMapper.mapToUserDTO(rs));
 			}
 		} catch (SQLException e) {
 			throw new DataAccessException("Error finding all users", e);
@@ -53,7 +53,7 @@ public class UserRepository {
 		return users;
 	}
 
-	public Optional<User> findById(UUID id) {
+	public Optional<UserDTO> findById(UUID id) {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findUserById");
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -61,7 +61,7 @@ public class UserRepository {
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
-					return Optional.of(DtoMapper.mapToUser(rs));
+					return Optional.of(DtoMapper.mapToUserDTO(rs));
 				}
 			}
 		} catch (SQLException e) {
@@ -71,7 +71,7 @@ public class UserRepository {
 		return Optional.empty();
 	}
 
-	public User create(String username, String email) {
+	public UserDTO create(String username, String email) {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "insertUser");
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -80,7 +80,7 @@ public class UserRepository {
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
-					return DtoMapper.mapToUser(rs);
+					return DtoMapper.mapToUserDTO(rs);
 				}
 			}
 		} catch (SQLException e) {
@@ -90,7 +90,7 @@ public class UserRepository {
 		throw new CreationFailedException("Failed to create user");
 	}
 
-	public Optional<UserWithProfile> findUserWithProfile(UUID userId) {
+	public Optional<UserWithProfileDTO> findUserWithProfile(UUID userId) {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findUserWithProfile");
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -98,25 +98,7 @@ public class UserRepository {
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
-					UserWithProfile uwp = new UserWithProfile();
-					uwp.setUserId((UUID) rs.getObject(DatabaseColumns.USER_ID));
-					uwp.setUsername(rs.getString(DatabaseColumns.USERNAME));
-					uwp.setEmail(rs.getString(DatabaseColumns.EMAIL));
-					uwp.setCreatedAt(rs.getTimestamp(DatabaseColumns.CREATED_AT).toLocalDateTime());
-
-					Object profileIdObj = rs.getObject(DatabaseColumns.PROFILE_ID);
-					if (profileIdObj != null) {
-						UserProfile profile = new UserProfile();
-						profile.setId((UUID) profileIdObj);
-						profile.setUserId((UUID) rs.getObject(DatabaseColumns.USER_ID));
-						profile.setFirstName(rs.getString(DatabaseColumns.FIRST_NAME));
-						profile.setLastName(rs.getString(DatabaseColumns.LAST_NAME));
-						profile.setPhone(rs.getString(DatabaseColumns.PHONE));
-						profile.setAddress(rs.getString(DatabaseColumns.ADDRESS));
-						uwp.setProfile(profile);
-					}
-
-					return Optional.of(uwp);
+					return Optional.of(DtoMapper.mapToUserWithProfileDTO(rs));
 				}
 			}
 		} catch (SQLException e) {
@@ -126,7 +108,7 @@ public class UserRepository {
 		return Optional.empty();
 	}
 
-	public UserProfile createProfile(UUID userId, String firstName, String lastName, String phone, String address) {
+	public UserProfileDTO createProfile(UUID userId, String firstName, String lastName, String phone, String address) {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "insertUserProfile");
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -138,7 +120,7 @@ public class UserRepository {
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				if (rs.next()) {
-					return DtoMapper.mapToUserProfile(rs);
+					return DtoMapper.mapToUserProfileDTO(rs);
 				}
 			}
 		} catch (SQLException e) {
@@ -148,21 +130,16 @@ public class UserRepository {
 		throw new CreationFailedException("Failed to create user profile");
 	}
 
-	public List<Role> findRolesByUserId(UUID userId) {
+	public List<RoleDTO> findRolesByUserId(UUID userId) {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findRolesByUserId");
-		List<Role> roles = new ArrayList<>();
+		List<RoleDTO> roles = new ArrayList<>();
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 			stmt.setObject(1, userId);
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
-					Role role = new Role();
-					role.setId((UUID) rs.getObject(DatabaseColumns.ID));
-					role.setName(rs.getString(DatabaseColumns.NAME));
-					role.setDescription(rs.getString(DatabaseColumns.DESCRIPTION));
-					role.setAssignedAt(rs.getTimestamp(DatabaseColumns.ASSIGNED_AT).toLocalDateTime());
-					roles.add(role);
+					roles.add(DtoMapper.mapToRoleDTO(rs));
 				}
 			}
 		} catch (SQLException e) {
@@ -185,7 +162,7 @@ public class UserRepository {
 	}
 
 	// Dynamic filter method
-	public List<User> findByFilters(Map<String, String> filters, String sortBy, String sortDirection,
+	public List<UserDTO> findByFilters(Map<String, String> filters, String sortBy, String sortDirection,
 			Integer limit, Integer offset) {
 		DynamicQueryBuilder queryBuilder = new DynamicQueryBuilder("users");
 		queryBuilder.select(DatabaseColumns.ID, DatabaseColumns.USERNAME, DatabaseColumns.EMAIL,
@@ -222,14 +199,14 @@ public class UserRepository {
 		}
 
 		String sql = queryBuilder.buildQuery();
-		List<User> users = new ArrayList<>();
+		List<UserDTO> users = new ArrayList<>();
 
 		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 			queryBuilder.setParameters(stmt);
 
 			try (ResultSet rs = stmt.executeQuery()) {
 				while (rs.next()) {
-					users.add(DtoMapper.mapToUser(rs));
+					users.add(DtoMapper.mapToUserDTO(rs));
 				}
 			}
 		} catch (SQLException e) {

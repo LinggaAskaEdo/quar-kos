@@ -3,9 +3,6 @@ package com.otis.usersvc.model;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
-
-@RegisterForReflection
 public class User {
 	private UUID id;
 	private String username;

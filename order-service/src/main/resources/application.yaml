@@ -27,14 +27,15 @@ quarkus:
   # Common Dependency
   index-dependency:
     common:
-      group-id: "com.otis"
-      artifact-id: "common-lib"
+      group-id: com.otis
+      artifact-id: common-lib
       classifier:
 
 # Kafka Configuration
 kafka:
   bootstrap:
     servers: localhost:9092
+    
 mp:
   messaging:
     incoming:
@@ -48,11 +49,11 @@ mp:
 
   # Logging
   log:
-    level: "INFO"
+    level: DEBUG
     category:
-      "com.otis.usersvc":
-        level: "DEBUG"
+      "com.otis.ordersvc":
+        level: DEBUG
       "io.quarkus.arc":
-        level: "DEBUG"
+        level: DEBUG
       "org.jboss.resteasy.reactive":
-        level: "DEBUG"
+        level: DEBUG

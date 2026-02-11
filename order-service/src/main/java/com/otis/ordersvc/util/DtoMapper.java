@@ -2,83 +2,125 @@ package com.otis.ordersvc.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.otis.ordersvc.model.Order;
-import com.otis.ordersvc.model.OrderItem;
-import com.otis.ordersvc.model.Product;
+import com.otis.common.preference.DatabaseColumns;
+import com.otis.ordersvc.dto.OrderDTO;
+import com.otis.ordersvc.dto.OrderItemDTO;
+import com.otis.ordersvc.dto.ProductDTO;
 
 public class DtoMapper {
-    private DtoMapper() {
-    }
+	private DtoMapper() {
+	}
 
-    public static Order mapToOrder(ResultSet rs) throws SQLException {
-        Order order = new Order();
-        order.setId((UUID) rs.getObject("id"));
-        order.setUserId((UUID) rs.getObject("user_id"));
-        order.setUsername(rs.getString("username"));
-        order.setTotalAmount(rs.getBigDecimal("total_amount"));
-        order.setStatus(rs.getString("status"));
-        Object correlationIdObj = rs.getObject("correlation_id");
-        if (correlationIdObj != null) {
-            order.setCorrelationId((UUID) correlationIdObj);
-        }
-        order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        return order;
-    }
+	public static OrderDTO mapToOrderDTO(ResultSet rs) throws SQLException {
+		return new OrderDTO(
+				extractUUID(rs, DatabaseColumns.ID),
+				extractUUID(rs, DatabaseColumns.USER_ID),
+				rs.getString(DatabaseColumns.USERNAME),
+				rs.getBigDecimal(DatabaseColumns.TOTAL_AMOUNT),
+				rs.getString(DatabaseColumns.STATUS),
+				extractUUID(rs, DatabaseColumns.CORRELATION_ID),
+				extractLocalDateTime(rs, DatabaseColumns.CREATED_AT),
+				List.of() // no items; use buildOrderWithItemsDTO() for items
+		);
+	}
 
-    public static Product mapToProduct(ResultSet rs) throws SQLException {
-        Product product = new Product();
-        product.setId((UUID) rs.getObject("id"));
-        product.setName(rs.getString("name"));
-        product.setDescription(rs.getString("description"));
-        product.setPrice(rs.getBigDecimal("price"));
-        product.setStock(rs.getInt("stock"));
-        return product;
-    }
+	public static ProductDTO mapToProductDTO(ResultSet rs) throws SQLException {
+		return new ProductDTO(
+				extractUUID(rs, DatabaseColumns.ID),
+				rs.getString(DatabaseColumns.NAME),
+				rs.getString(DatabaseColumns.DESCRIPTION),
+				rs.getBigDecimal(DatabaseColumns.PRICE),
+				rs.getInt(DatabaseColumns.STOCK));
+	}
 
-    public static Optional<Order> buildOrderWithItems(ResultSet rs) throws SQLException {
-        if (!rs.next()) {
-            return Optional.empty();
-        }
+	public static OrderItemDTO mapToOrderItemDTO(
+			ResultSet rs,
+			String productName,
+			String productDescription) throws SQLException {
+		return new OrderItemDTO(
+				extractUUID(rs, DatabaseColumns.ID),
+				extractUUID(rs, DatabaseColumns.ORDER_ID),
+				extractUUID(rs, DatabaseColumns.PRODUCT_ID),
+				productName,
+				productDescription,
+				rs.getInt(DatabaseColumns.QUANTITY),
+				rs.getBigDecimal(DatabaseColumns.PRICE));
+	}
 
-        Order order = new Order();
-        order.setId((UUID) rs.getObject("order_id"));
-        order.setUserId((UUID) rs.getObject("user_id"));
-        order.setUsername(rs.getString("username"));
-        order.setTotalAmount(rs.getBigDecimal("total_amount"));
-        order.setStatus(rs.getString("status"));
+	// ---------- Order with its items (from JOIN query) ----------
+	public static Optional<OrderDTO> buildOrderWithItemsDTO(ResultSet rs) throws SQLException {
+		if (!rs.next()) {
+			return Optional.empty();
+		}
 
-        Object correlationIdObj = rs.getObject("correlation_id");
-        if (correlationIdObj != null) {
-            order.setCorrelationId((UUID) correlationIdObj);
-        }
+		// Build the order DTO from the first row (no items yet)
+		OrderDTO order = buildOrderDTOFromCurrentRow(rs);
+		List<OrderItemDTO> items = new ArrayList<>();
 
-        order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+		// Process first row item if present
+		processOrderItemRowDTO(rs, order, items);
 
-        List<OrderItem> items = new ArrayList<>();
+		// Process remaining rows
+		while (rs.next()) {
+			processOrderItemRowDTO(rs, order, items);
+		}
 
-        do {
-            Object itemIdObj = rs.getObject("item_id");
-            if (itemIdObj != null) {
-                OrderItem item = new OrderItem();
-                item.setId((UUID) itemIdObj);
-                item.setOrderId(order.getId());
-                item.setProductId((UUID) rs.getObject("product_id"));
-                item.setProductName(rs.getString("product_name"));
-                item.setProductDescription(rs.getString("product_description"));
-                item.setQuantity(rs.getInt("quantity"));
-                item.setPrice(rs.getBigDecimal("item_price"));
+		// Return a new OrderDTO with the collected items
+		return Optional.of(new OrderDTO(
+				order.id(),
+				order.userId(),
+				order.username(),
+				order.totalAmount(),
+				order.status(),
+				order.correlationId(),
+				order.createdAt(),
+				items));
+	}
 
-                items.add(item);
-            }
-        } while (rs.next());
+	// ---------- Helper methods ----------
+	private static OrderDTO buildOrderDTOFromCurrentRow(ResultSet rs) throws SQLException {
+		return new OrderDTO(
+				extractUUID(rs, DatabaseColumns.ORDER_ID),
+				extractUUID(rs, DatabaseColumns.USER_ID),
+				rs.getString(DatabaseColumns.USERNAME),
+				rs.getBigDecimal(DatabaseColumns.TOTAL_AMOUNT),
+				rs.getString(DatabaseColumns.STATUS),
+				extractUUID(rs, DatabaseColumns.CORRELATION_ID),
+				extractLocalDateTime(rs, DatabaseColumns.CREATED_AT),
+				List.of() // placeholder, will be replaced later
+		);
+	}
 
-        order.setItems(items);
+	private static void processOrderItemRowDTO(ResultSet rs, OrderDTO order, List<OrderItemDTO> items)
+			throws SQLException {
+		UUID itemId = extractUUID(rs, DatabaseColumns.ITEM_ID);
+		if (itemId != null) {
+			OrderItemDTO item = new OrderItemDTO(
+					itemId,
+					order.id(), // orderId
+					extractUUID(rs, DatabaseColumns.PRODUCT_ID),
+					rs.getString(DatabaseColumns.PRODUCT_NAME),
+					rs.getString(DatabaseColumns.PRODUCT_DESCRIPTION),
+					rs.getInt(DatabaseColumns.QUANTITY),
+					rs.getBigDecimal(DatabaseColumns.ITEM_PRICE));
+			items.add(item);
+		}
+	}
 
-        return Optional.of(order);
-    }
+	// ---------- Utility methods for ResultSet ----------
+	private static UUID extractUUID(ResultSet rs, String columnName) throws SQLException {
+		Object obj = rs.getObject(columnName);
+		return (obj != null && !rs.wasNull()) ? (UUID) obj : null;
+	}
+
+	private static LocalDateTime extractLocalDateTime(ResultSet rs, String columnName) throws SQLException {
+		var timestamp = rs.getTimestamp(columnName);
+		return timestamp != null ? timestamp.toLocalDateTime() : null;
+	}
 }

@@ -82,6 +82,14 @@ run-all:
 		fi \
 	done
 
+debug-user:
+	@echo "🐞 Debugging user-service (JVM)..."
+	cd user-service && ./mvnw quarkus:dev
+
+debug-order:
+	@echo "🐞 Debugging order-service (JVM)..."
+	cd order-service && ./mvnw quarkus:dev
+
 run-user:
 	@echo "🚀 Running user-services (JVM)..."
 	cd user-service && java -jar target/quarkus-app/quarkus-run.jar

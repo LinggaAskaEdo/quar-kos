@@ -2,9 +2,6 @@ package com.otis.usersvc.model;
 
 import java.util.UUID;
 
-import io.quarkus.runtime.annotations.RegisterForReflection;
-
-@RegisterForReflection
 public class UserProfile {
 	private UUID id;
 	private UUID userId;

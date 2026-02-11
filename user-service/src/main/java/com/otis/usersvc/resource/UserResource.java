@@ -7,10 +7,10 @@ import java.util.UUID;
 
 import com.otis.usersvc.dto.CreateProfileRequest;
 import com.otis.usersvc.dto.CreateUserRequest;
+import com.otis.usersvc.dto.RoleDTO;
 import com.otis.usersvc.dto.SearchResponse;
-import com.otis.usersvc.model.Role;
-import com.otis.usersvc.model.User;
-import com.otis.usersvc.model.UserProfile;
+import com.otis.usersvc.dto.UserDTO;
+import com.otis.usersvc.dto.UserProfileDTO;
 import com.otis.usersvc.service.UserService;
 
 import jakarta.validation.Valid;
@@ -36,7 +36,7 @@ public class UserResource {
 	}
 
 	@GET
-	public List<User> getAllUsers() {
+	public List<UserDTO> getAllUsers() {
 		return userService.getAllUsers();
 	}
 
@@ -50,7 +50,7 @@ public class UserResource {
 
 	@POST
 	public Response createUser(@Valid CreateUserRequest request) {
-		User user = userService.createUser(request.getUsername(), request.getEmail());
+		UserDTO user = userService.createUser(request.getUsername(), request.getEmail());
 		return Response.status(Response.Status.CREATED).entity(user).build();
 	}
 
@@ -65,7 +65,7 @@ public class UserResource {
 	@POST
 	@Path("/{id}/profile")
 	public Response createUserProfile(@PathParam("id") UUID id, @Valid CreateProfileRequest request) {
-		UserProfile profile = userService.createUserProfile(id, request.getFirstName(), request.getLastName(),
+		UserProfileDTO profile = userService.createUserProfile(id, request.getFirstName(), request.getLastName(),
 				request.getPhone(), request.getAddress());
 
 		return Response.status(Response.Status.CREATED).entity(profile).build();
@@ -73,7 +73,7 @@ public class UserResource {
 
 	@GET
 	@Path("/{id}/roles")
-	public List<Role> getUserRoles(@PathParam("id") UUID id) {
+	public List<RoleDTO> getUserRoles(@PathParam("id") UUID id) {
 		return userService.getUserRoles(id);
 	}
 
@@ -108,7 +108,7 @@ public class UserResource {
 			filters.put("id", id);
 		}
 
-		List<User> users = userService.searchUsers(filters, sortBy, sortDirection, limit, offset);
+		List<UserDTO> users = userService.searchUsers(filters, sortBy, sortDirection, limit, offset);
 
 		return Response.ok(new SearchResponse(users, filters, limit, offset)).build();
 	}
