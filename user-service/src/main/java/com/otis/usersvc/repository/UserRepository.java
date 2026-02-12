@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 import com.otis.common.exception.CreationFailedException;
 import com.otis.common.exception.DataAccessException;
 import com.otis.common.preference.DatabaseColumns;
+import com.otis.common.preference.DatabaseOperator;
 import com.otis.common.preference.FilterKey;
 import com.otis.common.util.DynamicQueryBuilder;
 import com.otis.common.util.SqlQueryLoader;
@@ -170,15 +171,15 @@ public class UserRepository {
 
 		// Apply filters
 		if (filters.containsKey(FilterKey.USERNAME)) {
-			queryBuilder.where(DatabaseColumns.USERNAME, "ILIKE", "%" + filters.get("username") + "%");
+			queryBuilder.where(DatabaseColumns.USERNAME, DatabaseOperator.ILIKE, "%" + filters.get("username") + "%");
 		}
 
 		if (filters.containsKey(FilterKey.EMAIL)) {
-			queryBuilder.where(DatabaseColumns.EMAIL, "ILIKE", "%" + filters.get("email") + "%");
+			queryBuilder.where(DatabaseColumns.EMAIL, DatabaseOperator.ILIKE, "%" + filters.get("email") + "%");
 		}
 
 		if (filters.containsKey(FilterKey.ID)) {
-			queryBuilder.where(DatabaseColumns.ID, "=", UUID.fromString(filters.get("id")));
+			queryBuilder.where(DatabaseColumns.ID, DatabaseOperator.IS_EQUALS, UUID.fromString(filters.get("id")));
 		}
 
 		// Apply sorting

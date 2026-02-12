@@ -18,6 +18,7 @@ import org.jboss.logging.Logger;
 import com.otis.common.exception.CreationFailedException;
 import com.otis.common.exception.DataAccessException;
 import com.otis.common.preference.DatabaseColumns;
+import com.otis.common.preference.DatabaseOperator;
 import com.otis.common.preference.FilterKey;
 import com.otis.common.util.DynamicQueryBuilder;
 import com.otis.common.util.SqlQueryLoader;
@@ -144,23 +145,26 @@ public class OrderRepository {
 
 		// Apply filters
 		if (filters.containsKey(FilterKey.STATUS)) {
-			queryBuilder.where(DatabaseColumns.STATUS, "=", filters.get("status"));
+			queryBuilder.where(DatabaseColumns.STATUS, DatabaseOperator.IS_EQUALS, filters.get("status"));
 		}
 
 		if (filters.containsKey(FilterKey.USER_ID)) {
-			queryBuilder.where(DatabaseColumns.USER_ID, "=", UUID.fromString(filters.get("userId")));
+			queryBuilder.where(DatabaseColumns.USER_ID, DatabaseOperator.IS_EQUALS,
+					UUID.fromString(filters.get("userId")));
 		}
 
 		if (filters.containsKey(FilterKey.USERNAME)) {
-			queryBuilder.where(DatabaseColumns.USERNAME, "ILIKE", "%" + filters.get("username") + "%");
+			queryBuilder.where(DatabaseColumns.USERNAME, DatabaseOperator.ILIKE, "%" + filters.get("username") + "%");
 		}
 
 		if (filters.containsKey(FilterKey.MIN_AMOUNT)) {
-			queryBuilder.where(DatabaseColumns.TOTAL_AMOUNT, ">=", new BigDecimal(filters.get("minAmount")));
+			queryBuilder.where(DatabaseColumns.TOTAL_AMOUNT, DatabaseOperator.GREATER_THAN_OR_EQUALS,
+					new BigDecimal(filters.get("minAmount")));
 		}
 
 		if (filters.containsKey(FilterKey.MAX_AMOUNT)) {
-			queryBuilder.where(DatabaseColumns.TOTAL_AMOUNT, "<=", new BigDecimal(filters.get("maxAmount")));
+			queryBuilder.where(DatabaseColumns.TOTAL_AMOUNT, DatabaseOperator.LESS_THAN_OR_EQUALS,
+					new BigDecimal(filters.get("maxAmount")));
 		}
 
 		// Apply sorting
@@ -246,19 +250,22 @@ public class OrderRepository {
 
 		// Apply filters
 		if (filters.containsKey(FilterKey.NAME)) {
-			queryBuilder.where(DatabaseColumns.NAME, "ILIKE", "%" + filters.get("name") + "%");
+			queryBuilder.where(DatabaseColumns.NAME, DatabaseOperator.ILIKE, "%" + filters.get("name") + "%");
 		}
 
 		if (filters.containsKey(FilterKey.DESCRIPTION)) {
-			queryBuilder.where(DatabaseColumns.DESCRIPTION, "ILIKE", "%" + filters.get("description") + "%");
+			queryBuilder.where(DatabaseColumns.DESCRIPTION, DatabaseOperator.ILIKE,
+					"%" + filters.get("description") + "%");
 		}
 
 		if (filters.containsKey(FilterKey.MIN_PRICE)) {
-			queryBuilder.where(DatabaseColumns.PRICE, ">=", new BigDecimal(filters.get("minPrice")));
+			queryBuilder.where(DatabaseColumns.PRICE, DatabaseOperator.GREATER_THAN_OR_EQUALS,
+					new BigDecimal(filters.get("minPrice")));
 		}
 
 		if (filters.containsKey(FilterKey.MAX_PRICE)) {
-			queryBuilder.where(DatabaseColumns.PRICE, "<=", new BigDecimal(filters.get("maxPrice")));
+			queryBuilder.where(DatabaseColumns.PRICE, DatabaseOperator.LESS_THAN_OR_EQUALS,
+					new BigDecimal(filters.get("maxPrice")));
 		}
 
 		// Apply sorting

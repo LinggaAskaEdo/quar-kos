@@ -4,27 +4,27 @@ import java.util.List;
 import java.util.Map;
 
 public class OrderSearchResponse {
-	private List<OrderDTO> dataOrders;
+	private List<OrderDTO> data;
 	private Map<String, String> filters;
 	private Integer limit;
 	private Integer offset;
 	private Integer count;
 
-	public OrderSearchResponse(List<OrderDTO> dataOrders, Map<String, String> filters,
+	public OrderSearchResponse(List<OrderDTO> data, Map<String, String> filters,
 			Integer limit, Integer offset) {
-		this.dataOrders = dataOrders;
+		this.data = data;
 		this.filters = filters;
 		this.limit = limit;
 		this.offset = offset;
-		this.count = dataOrders != null ? dataOrders.size() : 0;
+		this.count = data != null ? data.size() : 0;
 	}
 
-	public List<OrderDTO> getDataOrders() {
-		return dataOrders;
+	public List<OrderDTO> getData() {
+		return data;
 	}
 
-	public void setDataOrders(List<OrderDTO> dataOrders) {
-		this.dataOrders = dataOrders;
+	public void setData(List<OrderDTO> data) {
+		this.data = data;
 	}
 
 	public Map<String, String> getFilters() {

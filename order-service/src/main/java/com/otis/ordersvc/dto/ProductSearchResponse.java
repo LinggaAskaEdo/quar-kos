@@ -4,28 +4,28 @@ import java.util.List;
 import java.util.Map;
 
 public class ProductSearchResponse {
-	private List<ProductDTO> dataProducts;
+	private List<ProductDTO> data;
 	private Map<String, String> filters;
 	private Integer limit;
 	private Integer offset;
 	private Integer count;
 
-	public ProductSearchResponse(List<ProductDTO> dataProducts, Map<String, String> filters,
+	public ProductSearchResponse(List<ProductDTO> data, Map<String, String> filters,
 			Integer limit, Integer offset) {
-		this.dataProducts = dataProducts;
+		this.data = data;
 		this.filters = filters;
 		this.limit = limit;
 		this.offset = offset;
-		this.count = dataProducts != null ? dataProducts.size() : 0;
+		this.count = data != null ? data.size() : 0;
 	}
 
 	// Getters and setters
-	public List<ProductDTO> getDataProducts() {
-		return dataProducts;
+	public List<ProductDTO> getData() {
+		return data;
 	}
 
-	public void setDataProducts(List<ProductDTO> dataProducts) {
-		this.dataProducts = dataProducts;
+	public void setData(List<ProductDTO> data) {
+		this.data = data;
 	}
 
 	public Map<String, String> getFilters() {
