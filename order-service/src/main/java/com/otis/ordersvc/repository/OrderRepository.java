@@ -39,6 +39,50 @@ public class OrderRepository {
 		this.dataSource = dataSource;
 	}
 
+	public OrderDTO create(UUID userId, String username, BigDecimal totalAmount, String status, UUID correlationId) {
+		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "insertOrder");
+
+		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setObject(1, userId);
+			stmt.setString(2, username);
+			stmt.setBigDecimal(3, totalAmount);
+			stmt.setString(4, status);
+			stmt.setObject(5, correlationId);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return DtoMapper.mapToOrderDTO(rs);
+				}
+			}
+		} catch (SQLException e) {
+			throw new CreationFailedException("Error creating order", e);
+		}
+
+		throw new CreationFailedException("Failed to create order");
+	}
+
+	public OrderItemDTO createOrderItem(UUID orderId, UUID productId, Integer quantity,
+			String productName, String productDescription, BigDecimal price) {
+		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "insertOrderItem");
+
+		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setObject(1, orderId);
+			stmt.setObject(2, productId);
+			stmt.setInt(3, quantity);
+			stmt.setBigDecimal(4, price);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return DtoMapper.mapToOrderItemDTO(rs, productName, productDescription);
+				}
+			}
+		} catch (SQLException e) {
+			throw new CreationFailedException("Error creating order item", e);
+		}
+
+		throw new CreationFailedException("Failed to create order item");
+	}
+
 	public List<OrderDTO> findAll() {
 		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findAllOrders");
 		List<OrderDTO> orders = new ArrayList<>();
@@ -90,90 +134,8 @@ public class OrderRepository {
 		return orders;
 	}
 
-	public OrderDTO create(UUID userId, String username, BigDecimal totalAmount, String status, UUID correlationId) {
-		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "insertOrder");
-
-		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setObject(1, userId);
-			stmt.setString(2, username);
-			stmt.setBigDecimal(3, totalAmount);
-			stmt.setString(4, status);
-			stmt.setObject(5, correlationId);
-
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					return DtoMapper.mapToOrderDTO(rs);
-				}
-			}
-		} catch (SQLException e) {
-			throw new CreationFailedException("Error creating order", e);
-		}
-
-		throw new CreationFailedException("Failed to create order");
-	}
-
-	public OrderItemDTO createOrderItem(UUID orderId, UUID productId, Integer quantity,
-			String productName, String productDescription, BigDecimal price) {
-		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "insertOrderItem");
-
-		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setObject(1, orderId);
-			stmt.setObject(2, productId);
-			stmt.setInt(3, quantity);
-			stmt.setBigDecimal(4, price);
-
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					return DtoMapper.mapToOrderItemDTO(rs, productName, productDescription);
-				}
-			}
-		} catch (SQLException e) {
-			throw new CreationFailedException("Error creating order item", e);
-		}
-
-		throw new CreationFailedException("Failed to create order item");
-	}
-
-	public List<ProductDTO> findAllProducts() {
-		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findAllProducts");
-		List<ProductDTO> products = new ArrayList<>();
-
-		try (Connection conn = dataSource.getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql);
-				ResultSet rs = stmt.executeQuery()) {
-
-			while (rs.next()) {
-				products.add(DtoMapper.mapToProductDTO(rs));
-			}
-		} catch (SQLException e) {
-			throw new DataAccessException("Error finding all products", e);
-		}
-
-		return products;
-	}
-
-	public Optional<ProductDTO> findProductById(UUID id) {
-		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findProductById");
-
-		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-			stmt.setObject(1, id);
-
-			LOG.debugf("Executing query: %s", stmt.toString());
-
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.next()) {
-					return Optional.of(DtoMapper.mapToProductDTO(rs));
-				}
-			}
-		} catch (SQLException e) {
-			LOG.error("Error when findProductById: ", e);
-			throw new DataAccessException("Error finding product by id", e);
-		}
-
-		return Optional.empty();
-	}
-
-	public List<OrderDTO> findByFilters(Map<String, String> filters, String sortBy, String sortDirection,
+	public List<OrderDTO> findOrdersByFilters(Map<String, String> filters,
+			String sortBy, String sortDirection,
 			Integer limit, Integer offset) {
 		DynamicQueryBuilder queryBuilder = new DynamicQueryBuilder("orders");
 		queryBuilder.select(DatabaseColumns.ID, DatabaseColumns.USER_ID, DatabaseColumns.USERNAME,
@@ -234,5 +196,103 @@ public class OrderRepository {
 		}
 
 		return orders;
+	}
+
+	public List<ProductDTO> findAllProducts() {
+		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findAllProducts");
+		List<ProductDTO> products = new ArrayList<>();
+
+		try (Connection conn = dataSource.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = stmt.executeQuery()) {
+
+			while (rs.next()) {
+				products.add(DtoMapper.mapToProductDTO(rs));
+			}
+		} catch (SQLException e) {
+			throw new DataAccessException("Error finding all products", e);
+		}
+
+		return products;
+	}
+
+	public Optional<ProductDTO> findProductById(UUID id) {
+		String sql = SqlQueryLoader.loadQuery(QUERY_FILE, "findProductById");
+
+		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setObject(1, id);
+
+			LOG.debugf("Executing query: %s", stmt.toString());
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return Optional.of(DtoMapper.mapToProductDTO(rs));
+				}
+			}
+		} catch (SQLException e) {
+			LOG.error("Error when findProductById: ", e);
+			throw new DataAccessException("Error finding product by id", e);
+		}
+
+		return Optional.empty();
+	}
+
+	public List<ProductDTO> findProductsByFilters(Map<String, String> filters,
+			String sortBy, String sortDirection,
+			Integer limit, Integer offset) {
+		DynamicQueryBuilder queryBuilder = new DynamicQueryBuilder("products");
+		queryBuilder.select(DatabaseColumns.ID, DatabaseColumns.NAME, DatabaseColumns.DESCRIPTION,
+				DatabaseColumns.PRICE, DatabaseColumns.STOCK);
+
+		// Apply filters
+		if (filters.containsKey(FilterKey.NAME)) {
+			queryBuilder.where(DatabaseColumns.NAME, "ILIKE", "%" + filters.get("name") + "%");
+		}
+
+		if (filters.containsKey(FilterKey.DESCRIPTION)) {
+			queryBuilder.where(DatabaseColumns.DESCRIPTION, "ILIKE", "%" + filters.get("description") + "%");
+		}
+
+		if (filters.containsKey(FilterKey.MIN_PRICE)) {
+			queryBuilder.where(DatabaseColumns.PRICE, ">=", new BigDecimal(filters.get("minPrice")));
+		}
+
+		if (filters.containsKey(FilterKey.MAX_PRICE)) {
+			queryBuilder.where(DatabaseColumns.PRICE, "<=", new BigDecimal(filters.get("maxPrice")));
+		}
+
+		// Apply sorting
+		if (sortBy != null && !sortBy.isEmpty()) {
+			String direction = (sortDirection != null && sortDirection.equalsIgnoreCase("ASC")) ? "ASC" : "DESC";
+			queryBuilder.orderBy(sortBy, direction);
+		} else {
+			queryBuilder.orderBy(DatabaseColumns.CREATED_AT, "DESC");
+		}
+
+		// Apply pagination
+		if (limit != null) {
+			queryBuilder.limit(limit);
+		}
+
+		if (offset != null) {
+			queryBuilder.offset(offset);
+		}
+
+		String sql = queryBuilder.buildQuery();
+		List<ProductDTO> products = new ArrayList<>();
+
+		try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			queryBuilder.setParameters(stmt);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					products.add(DtoMapper.mapToProductDTO(rs));
+				}
+			}
+		} catch (SQLException e) {
+			throw new DataAccessException("Error executing dynamic query", e);
+		}
+
+		return products;
 	}
 }

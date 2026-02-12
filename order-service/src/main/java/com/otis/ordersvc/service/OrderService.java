@@ -27,26 +27,6 @@ public class OrderService {
 		this.orderRepository = orderRepository;
 	}
 
-	public List<OrderDTO> getAllOrders() {
-		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
-		LOG.infof("[%s] Getting all orders", correlationId);
-
-		return orderRepository.findAll();
-	}
-
-	public Optional<OrderDTO> getOrderById(UUID id) {
-		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
-		LOG.infof("[%s] Getting order by id: %s", correlationId, id);
-
-		return orderRepository.findById(id);
-	}
-
-	public List<OrderDTO> getOrdersByUserId(UUID userId) {
-		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
-		LOG.infof("[%s] Getting orders for user: %s", correlationId, userId);
-		return orderRepository.findByUserId(userId);
-	}
-
 	@Transactional
 	public OrderDTO createOrder(UUID userId, String username, List<OrderItemRequest> itemRequests) {
 		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
@@ -83,6 +63,35 @@ public class OrderService {
 		return orderRepository.findById(order.id()).orElseThrow();
 	}
 
+	public List<OrderDTO> getAllOrders() {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting all orders", correlationId);
+
+		return orderRepository.findAll();
+	}
+
+	public Optional<OrderDTO> getOrderById(UUID id) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting order by id: %s", correlationId, id);
+
+		return orderRepository.findById(id);
+	}
+
+	public List<OrderDTO> getOrdersByUserId(UUID userId) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Getting orders for user: %s", correlationId, userId);
+		return orderRepository.findByUserId(userId);
+	}
+
+	public List<OrderDTO> searchOrders(Map<String, String> filters,
+			String sortBy, String sortDirection,
+			Integer limit, Integer offset) {
+		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+		LOG.infof("[%s] Searching orders with filters: %s", correlationId, filters);
+
+		return orderRepository.findOrdersByFilters(filters, sortBy, sortDirection, limit, offset);
+	}
+
 	public List<ProductDTO> getAllProducts() {
 		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
 		LOG.infof("[%s] Getting all products", correlationId);
@@ -97,11 +106,12 @@ public class OrderService {
 		return orderRepository.findProductById(id);
 	}
 
-	public List<OrderDTO> searchOrders(Map<String, String> filters, String sortBy, String sortDirection,
+	public List<ProductDTO> searchProducts(Map<String, String> filters,
+			String sortBy, String sortDirection,
 			Integer limit, Integer offset) {
 		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
-		LOG.infof("[%s] Searching orders with filters: %s", correlationId, filters);
+		LOG.infof("[%s] Searching products with filters: %s", correlationId, filters);
 
-		return orderRepository.findByFilters(filters, sortBy, sortDirection, limit, offset);
+		return orderRepository.findProductsByFilters(filters, sortBy, sortDirection, limit, offset);
 	}
 }

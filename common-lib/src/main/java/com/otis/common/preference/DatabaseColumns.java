@@ -29,6 +29,8 @@ public class DatabaseColumns {
 	public static final String PRICE = "price";
 	public static final String STOCK = "stock";
 	public static final String ITEM_PRICE = "item_price";
+	public static final String MIN_PRICE = "min_price";
+	public static final String MAX_PRICE = "max_price";
 
 	public static final String CREATED_AT = "created_at";
 	public static final String ASSIGNED_AT = "assigned_at";

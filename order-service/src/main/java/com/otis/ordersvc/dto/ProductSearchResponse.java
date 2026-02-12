@@ -3,31 +3,33 @@ package com.otis.ordersvc.dto;
 import java.util.List;
 import java.util.Map;
 
-public class SearchResponse {
-	private List<OrderDTO> data;
+public class ProductSearchResponse {
+	private List<ProductDTO> dataProducts;
 	private Map<String, String> filters;
 	private Integer limit;
 	private Integer offset;
 	private Integer count;
 
-	public SearchResponse(List<OrderDTO> data, Map<String, String> filters, Integer limit, Integer offset) {
-		this.data = data;
+	public ProductSearchResponse(List<ProductDTO> dataProducts, Map<String, String> filters,
+			Integer limit, Integer offset) {
+		this.dataProducts = dataProducts;
 		this.filters = filters;
 		this.limit = limit;
 		this.offset = offset;
-		this.count = data.size();
+		this.count = dataProducts != null ? dataProducts.size() : 0;
 	}
 
-	public List<OrderDTO> getData() {
-		return this.data;
+	// Getters and setters
+	public List<ProductDTO> getDataProducts() {
+		return dataProducts;
 	}
 
-	public void setData(List<OrderDTO> data) {
-		this.data = data;
+	public void setDataProducts(List<ProductDTO> dataProducts) {
+		this.dataProducts = dataProducts;
 	}
 
 	public Map<String, String> getFilters() {
-		return this.filters;
+		return filters;
 	}
 
 	public void setFilters(Map<String, String> filters) {
@@ -35,7 +37,7 @@ public class SearchResponse {
 	}
 
 	public Integer getLimit() {
-		return this.limit;
+		return limit;
 	}
 
 	public void setLimit(Integer limit) {
@@ -43,7 +45,7 @@ public class SearchResponse {
 	}
 
 	public Integer getOffset() {
-		return this.offset;
+		return offset;
 	}
 
 	public void setOffset(Integer offset) {
@@ -51,7 +53,7 @@ public class SearchResponse {
 	}
 
 	public Integer getCount() {
-		return this.count;
+		return count;
 	}
 
 	public void setCount(Integer count) {

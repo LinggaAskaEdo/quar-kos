@@ -7,8 +7,9 @@ import java.util.UUID;
 
 import com.otis.ordersvc.dto.CreateOrderRequest;
 import com.otis.ordersvc.dto.OrderDTO;
+import com.otis.ordersvc.dto.OrderSearchResponse;
 import com.otis.ordersvc.dto.ProductDTO;
-import com.otis.ordersvc.dto.SearchResponse;
+import com.otis.ordersvc.dto.ProductSearchResponse;
 import com.otis.ordersvc.service.OrderService;
 
 import jakarta.ws.rs.Consumes;
@@ -77,22 +78,26 @@ public class OrderResource {
 		if (status != null && !status.isEmpty()) {
 			filters.put("status", status);
 		}
+
 		if (userId != null && !userId.isEmpty()) {
 			filters.put("userId", userId);
 		}
+
 		if (username != null && !username.isEmpty()) {
 			filters.put("username", username);
 		}
+
 		if (minAmount != null && !minAmount.isEmpty()) {
 			filters.put("minAmount", minAmount);
 		}
+
 		if (maxAmount != null && !maxAmount.isEmpty()) {
 			filters.put("maxAmount", maxAmount);
 		}
 
 		List<OrderDTO> orders = orderService.searchOrders(filters, sortBy, sortDirection, limit, offset);
 
-		return Response.ok(new SearchResponse(orders, filters, limit, offset)).build();
+		return Response.ok(new OrderSearchResponse(orders, filters, limit, offset)).build();
 	}
 
 	@GET
@@ -107,5 +112,39 @@ public class OrderResource {
 		return orderService.getProductById(id)
 				.map(product -> Response.ok(product).build())
 				.orElse(Response.status(Response.Status.NOT_FOUND).build());
+	}
+
+	@GET
+	@Path("/products/search")
+	public Response searchProducts(
+			@QueryParam("name") String name,
+			@QueryParam("description") String description,
+			@QueryParam("minPrice") String minPrice,
+			@QueryParam("maxPrice") String maxPrice,
+			@QueryParam("sortBy") @DefaultValue("id") String sortBy,
+			@QueryParam("sortDirection") @DefaultValue("DESC") String sortDirection,
+			@QueryParam("limit") @DefaultValue("100") Integer limit,
+			@QueryParam("offset") @DefaultValue("0") Integer offset) {
+
+		Map<String, String> filters = new HashMap<>();
+		if (name != null && !name.isEmpty()) {
+			filters.put("name", name);
+		}
+
+		if (description != null && !description.isEmpty()) {
+			filters.put("description", description);
+		}
+
+		if (minPrice != null && !minPrice.isEmpty()) {
+			filters.put("minPrice", minPrice);
+		}
+
+		if (maxPrice != null && !maxPrice.isEmpty()) {
+			filters.put("maxPrice", maxPrice);
+		}
+
+		List<ProductDTO> products = orderService.searchProducts(filters, sortBy, sortDirection, limit, offset);
+
+		return Response.ok(new ProductSearchResponse(products, filters, limit, offset)).build();
 	}
 }
