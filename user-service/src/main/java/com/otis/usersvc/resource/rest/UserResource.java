@@ -1,4 +1,4 @@
-package com.otis.usersvc.resource;
+package com.otis.usersvc.resource.rest;
 
 import java.util.HashMap;
 import java.util.List;

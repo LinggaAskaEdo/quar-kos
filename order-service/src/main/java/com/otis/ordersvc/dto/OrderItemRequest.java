@@ -3,22 +3,27 @@ package com.otis.ordersvc.dto;
 import java.util.UUID;
 
 public class OrderItemRequest {
-    private UUID productId;
-    private Integer quantity;
+	private UUID productId;
+	private Integer quantity;
 
-    public UUID getProductId() {
-        return this.productId;
-    }
+	public OrderItemRequest(UUID productId, Integer quantity) {
+		this.productId = productId;
+		this.quantity = quantity;
+	}
 
-    public void setProductId(UUID productId) {
-        this.productId = productId;
-    }
+	public UUID getProductId() {
+		return this.productId;
+	}
 
-    public Integer getQuantity() {
-        return this.quantity;
-    }
+	public void setProductId(UUID productId) {
+		this.productId = productId;
+	}
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
+	public Integer getQuantity() {
+		return this.quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
 }

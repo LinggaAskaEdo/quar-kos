@@ -1,4 +1,4 @@
-package com.otis.usersvc.dto;
+package com.otis.common.dto;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,28 +16,28 @@ public record UserEvent(
 		String email,
 		Instant timestamp) {
 	// Factory method for USER_CREATED event
-	public static UserEvent createdUser(UUID correlationId, UUID userId, String username, String email) {
+	public static UserEvent createdUser(UUID correlationId, UUID userId, String username) {
 		return new UserEvent(
 				correlationId,
 				"USER_CREATED",
 				userId,
 				username,
-				null, // firstName
-				null, // lastName
-				email,
+				null,
+				null,
+				null,
 				Instant.now());
 	}
 
 	// Factory method for USER_PROFILE_CREATED event
-	public static UserEvent createdUserProfile(UUID correlationId, UUID userId, String firstName, String lastName) {
+	public static UserEvent createdUserProfile(UUID correlationId, UUID userId, String username) {
 		return new UserEvent(
 				correlationId,
 				"USER_PROFILE_CREATED",
 				userId,
-				null, // username
-				firstName,
-				lastName,
-				null, // email
+				username,
+				null,
+				null,
+				null,
 				Instant.now());
 	}
 }

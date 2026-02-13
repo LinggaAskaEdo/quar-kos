@@ -80,6 +80,10 @@ public class CorrelationIdFilter implements ContainerRequestFilter, ContainerRes
 		return correlationId.get();
 	}
 
+	public static void setCurrentCorrelationId(UUID id) {
+		correlationId.set(id);
+	}
+
 	public static Long getCurrentElapsedTime() {
 		Long startTime = requestStartTime.get();
 		if (startTime != null) {

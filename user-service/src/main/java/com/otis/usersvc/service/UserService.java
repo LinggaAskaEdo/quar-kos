@@ -7,13 +7,14 @@ import java.util.UUID;
 
 import org.jboss.logging.Logger;
 
+import com.otis.common.exception.EntityNotFoundException;
 import com.otis.common.util.CorrelationIdFilter;
 import com.otis.usersvc.dto.RoleDTO;
 import com.otis.usersvc.dto.UserDTO;
 import com.otis.usersvc.dto.UserProfileDTO;
 import com.otis.usersvc.dto.UserWithProfileDTO;
-import com.otis.usersvc.kafka.UserEventProducer;
 import com.otis.usersvc.repository.UserRepository;
+import com.otis.usersvc.resource.kafka.UserEventProducer;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -50,7 +51,7 @@ public class UserService {
 		LOG.infof("[%s] Creating user: %s", correlationId, username);
 
 		UserDTO user = userRepository.create(username, email);
-		eventProducer.sendUserCreatedEvent(correlationId, user.id(), user.username(), user.email());
+		eventProducer.sendUserCreatedEvent(correlationId, user.id(), user.username());
 
 		return user;
 	}
@@ -65,8 +66,12 @@ public class UserService {
 		UUID correlationId = CorrelationIdFilter.getCurrentCorrelationId();
 		LOG.infof("[%s] Creating profile for user: %s", correlationId, userId);
 
+		UserDTO user = userRepository
+				.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("User", userId));
+
 		UserProfileDTO profile = userRepository.createProfile(userId, firstName, lastName, phone, address);
-		eventProducer.sendUserProfileCreatedEvent(correlationId, userId, firstName, lastName);
+		eventProducer.sendUserProfileCreatedEvent(correlationId, userId, user.username());
 
 		return profile;
 	}

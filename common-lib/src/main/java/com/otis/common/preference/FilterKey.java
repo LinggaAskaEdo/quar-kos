@@ -15,4 +15,5 @@ public class FilterKey {
 	public static final String DESCRIPTION = "description";
 	public static final String MIN_PRICE = "minPrice";
 	public static final String MAX_PRICE = "maxPrice";
+	public static final String STOCK = "stock";
 }

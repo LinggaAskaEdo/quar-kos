@@ -1,14 +1,16 @@
 package com.otis.common.exception;
 
+import java.util.UUID;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 public class EntityNotFoundException extends RepositoryException {
 	private final String entityName;
-	private final Long entityId;
+	private final UUID entityId;
 
-	public EntityNotFoundException(String entityName, Long entityId) {
-		super(String.format("%s with id %d not found", entityName, entityId));
+	public EntityNotFoundException(String entityName, UUID entityId) {
+		super(String.format("%s with id %s not found", entityName, entityId));
 		this.entityName = entityName;
 		this.entityId = entityId;
 	}
@@ -24,7 +26,7 @@ public class EntityNotFoundException extends RepositoryException {
 		return entityName;
 	}
 
-	public Long getEntityId() {
+	public UUID getEntityId() {
 		return entityId;
 	}
 }

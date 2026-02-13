@@ -268,12 +268,17 @@ public class OrderRepository {
 					new BigDecimal(filters.get("maxPrice")));
 		}
 
+		if (filters.containsKey(FilterKey.STOCK)) {
+			queryBuilder.where(DatabaseColumns.STOCK, DatabaseOperator.LESS_THAN_OR_EQUALS,
+					Integer.parseInt(filters.get("stock")));
+		}
+
 		// Apply sorting
 		if (sortBy != null && !sortBy.isEmpty()) {
 			String direction = (sortDirection != null && sortDirection.equalsIgnoreCase("ASC")) ? "ASC" : "DESC";
 			queryBuilder.orderBy(sortBy, direction);
 		} else {
-			queryBuilder.orderBy(DatabaseColumns.CREATED_AT, "DESC");
+			queryBuilder.orderBy(DatabaseColumns.ID, "DESC");
 		}
 
 		// Apply pagination

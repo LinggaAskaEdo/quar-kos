@@ -1,4 +1,4 @@
-package com.otis.ordersvc.resource;
+package com.otis.ordersvc.resource.rest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -121,6 +121,7 @@ public class OrderResource {
 			@QueryParam("description") String description,
 			@QueryParam("minPrice") String minPrice,
 			@QueryParam("maxPrice") String maxPrice,
+			@QueryParam("stock") String stock,
 			@QueryParam("sortBy") @DefaultValue("id") String sortBy,
 			@QueryParam("sortDirection") @DefaultValue("DESC") String sortDirection,
 			@QueryParam("limit") @DefaultValue("100") Integer limit,
@@ -141,6 +142,10 @@ public class OrderResource {
 
 		if (maxPrice != null && !maxPrice.isEmpty()) {
 			filters.put("maxPrice", maxPrice);
+		}
+
+		if (stock != null && !stock.isEmpty()) {
+			filters.put("stock", stock);
 		}
 
 		List<ProductDTO> products = orderService.searchProducts(filters, sortBy, sortDirection, limit, offset);
