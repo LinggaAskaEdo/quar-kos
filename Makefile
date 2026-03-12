@@ -2,6 +2,7 @@
 MAVEN := mvn
 MODULES := common-lib user-service order-service
 SERVICES := user-service order-service
+QUARKUS := quarkus
 
 # Native build options
 NATIVE_OPTS := -Dnative -Dquarkus.native.enabled=true -Dquarkus.native.native-image-xmx=4g -DskipTests
@@ -119,6 +120,15 @@ run-native-user:
 run-native-order:
 	@echo "⚡ Running order-service native executables..."
 	cd order-service && ./target/*-runner
+
+upgrade-all:
+	@echo "🔨 Building services (JVM)..."
+	@for service in $(MODULES); do \
+		if [ -d "$$service" ]; then \
+			echo "  Building $$service..."; \
+			(cd $$service && ${QUARKUS} update -y); \
+		fi \
+	done
 
 # ===== Help =====
 help:
