@@ -20,6 +20,13 @@ public class CreateProfileRequest {
 	@NotBlank(message = "Address may not be null")
 	private String address;
 
+	public CreateProfileRequest(String firstName, String lastName, String phone, String address) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.phone = phone;
+		this.address = address;
+	}
+
 	public String getFirstName() {
 		return this.firstName;
 	}

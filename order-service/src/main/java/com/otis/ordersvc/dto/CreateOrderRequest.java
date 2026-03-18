@@ -4,31 +4,37 @@ import java.util.List;
 import java.util.UUID;
 
 public class CreateOrderRequest {
-    private UUID userId;
-    private String username;
-    private List<OrderItemRequest> items;
+	private UUID userId;
+	private String username;
+	private List<OrderItemRequest> items;
 
-    public UUID getUserId() {
-        return this.userId;
-    }
+	public CreateOrderRequest(UUID userId, String username, List<OrderItemRequest> items) {
+		this.userId = userId;
+		this.username = username;
+		this.items = items;
+	}
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
+	public UUID getUserId() {
+		return this.userId;
+	}
 
-    public String getUsername() {
-        return this.username;
-    }
+	public void setUserId(UUID userId) {
+		this.userId = userId;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public String getUsername() {
+		return this.username;
+	}
 
-    public List<OrderItemRequest> getItems() {
-        return this.items;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public void setItems(List<OrderItemRequest> items) {
-        this.items = items;
-    }
+	public List<OrderItemRequest> getItems() {
+		return this.items;
+	}
+
+	public void setItems(List<OrderItemRequest> items) {
+		this.items = items;
+	}
 }

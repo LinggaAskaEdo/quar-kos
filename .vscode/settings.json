@@ -14,5 +14,6 @@
   "yaml.schemas": {
     "microprofile://schema/file%3A///home/lingga/Workspaces/Java/quar-kos/user-service/src/main/resources/application.yml": false
   },
-  "yaml.validate": false
+"yaml.validate": false,
+"java.debug.settings.onBuildFailureProceed": true
 }

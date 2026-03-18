@@ -14,6 +14,11 @@ public class CreateUserRequest {
 	@Email
 	private String email;
 
+	public CreateUserRequest(String username, String email) {
+		this.username = username;
+		this.email = email;
+	}
+
 	public String getUsername() {
 		return this.username;
 	}
