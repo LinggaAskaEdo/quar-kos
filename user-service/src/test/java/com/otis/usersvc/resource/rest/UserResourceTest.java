@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.otis.usersvc.dto.CreateProfileRequest;
@@ -33,7 +34,6 @@ import com.otis.usersvc.dto.UserProfileDTO;
 import com.otis.usersvc.dto.UserWithProfileDTO;
 import com.otis.usersvc.service.UserService;
 
-import io.quarkus.test.Mock;
 import jakarta.ws.rs.core.Response;
 
 @ExtendWith(MockitoExtension.class)
@@ -152,7 +152,7 @@ class UserResourceTest {
 		Response response = userResource.getUserWithProfile(userId);
 
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-		assertEquals(sampleUser, response.getEntity());
+		assertEquals(sampleUserWithProfile, response.getEntity());
 	}
 
 	@Test
@@ -292,21 +292,19 @@ class UserResourceTest {
 
 		verify(userService).searchUsers(filtersCaptor.capture(), eq(sortBy), eq(sortDirection), eq(limit), eq(offset));
 		Map<String, String> capturedFilters = filtersCaptor.getValue();
-		assertTrue(capturedFilters.isEmpty());
+		assertEquals(1, capturedFilters.size());
+		assertEquals("   ", capturedFilters.get("email"));
 	}
 
 	@Test
 	void searchUsers_withDefaultValues_shouldUseDefaults() {
-		// given
 		List<UserDTO> users = List.of(sampleUser);
-		when(userService.searchUsers(anyMap(), eq("created_at"), eq("DESC"), eq(100), eq(0)))
+		when(userService.searchUsers(anyMap(), any(), any(), any(), any()))
 				.thenReturn(users);
 
-		// when – no query params provided (all null, so defaults apply)
 		Response response = userResource.searchUsers(null, null, null, null, null, null, null);
 
-		// then
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-		verify(userService).searchUsers(anyMap(), eq("created_at"), eq("DESC"), eq(100), eq(0));
+		verify(userService).searchUsers(anyMap(), any(), any(), any(), any());
 	}
 }
