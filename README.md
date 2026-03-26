@@ -36,36 +36,36 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           Quar-Kos System                               │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ┌──────────────────────┐         ┌──────────────────────┐             │
-│  │    user-service      │         │    order-service     │             │
-│  │    (Port: 8082)      │         │    (Port: 8081)     │             │
-│  ├──────────────────────┤         ├──────────────────────┤             │
-│  │  - User CRUD         │         │  - Order CRUD        │             │
-│  │  - User Profiles     │         │  - Products          │             │
-│  │  - Role Management   │         │  - Order Items       │             │
-│  │  - Search/Filtering  │         │  - Search/Filtering  │             │
-│  │  - Kafka Producer    │         │  - Kafka Consumer    │             │
-│  └──────────┬───────────┘         └──────────┬───────────┘             │
-│             │                                │                         │
-│             │         ┌──────────────┐       │                         │
-│             │         │     Kafka    │       │                         │
-│             └────────►│  (user-events)│◄─────┘                         │
-│                       └──────────────┘                                 │
+│  ┌──────────────────────┐         ┌──────────────────────┐              │
+│  │    user-service      │         │    order-service     │              │
+│  │    (Port: 8082)      │         │    (Port: 8081)      │              │
+│  ├──────────────────────┤         ├──────────────────────┤              │
+│  │  - User CRUD         │         │  - Order CRUD        │              │ 
+│  │  - User Profiles     │         │  - Products          │              │
+│  │  - Role Management   │         │  - Order Items       │              │
+│  │  - Search/Filtering  │         │  - Search/Filtering  │              │
+│  │  - Kafka Producer    │         │  - Kafka Consumer    │              │
+│  └──────────┬───────────┘         └──────────┬───────────┘              │
+│             │                                │                          │
+│             │         ┌──────────────┐       │                          │
+│             │         │     Kafka    │       │                          │
+│             └────────►│ (user-events)│ ◄─────┘                          │
+│                       └──────────────┘                                  │
 │                                                                         │
-│  ┌──────────────────────┐                                              │
-│  │     common-lib       │                                              │
-│  │  (Shared Library)    │                                              │
-│  ├──────────────────────┤                                              │
-│  │  - Exceptions        │                                              │
-│  │  - DTOs              │                                              │
-│  │  - Utilities          │                                              │
-│  │  - Constants         │                                              │
-│  └──────────────────────┘                                              │
+│  ┌──────────────────────┐                                               │
+│  │     common-lib       │                                               │
+│  │  (Shared Library)    │                                               │
+│  ├──────────────────────┤                                               │
+│  │  - Exceptions        │                                               │
+│  │  - DTOs              │                                               │
+│  │  - Utilities         │                                               │
+│  │  - Constants         │                                               │
+│  └──────────────────────┘                                               │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
@@ -74,8 +74,8 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
                     ▼               ▼               ▼
             ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
             │ PostgreSQL  │ │ PostgreSQL  │ │    Kafka    │
-            │ (userdb)   │ │ (orderdb)  │ │  (9092)     │
-            │  (5432)    │ │  (5433)    │ │             │
+            │ (userdb)    │ │ (orderdb)   │ │  (9092)     │
+            │  (5432)     │ │  (5433)     │ │             │
             └─────────────┘ └─────────────┘ └─────────────┘
 ```
 
@@ -84,7 +84,7 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
 ## Modules
 
 | Module | Port | Description |
-|--------|------|-------------|
+| --- | --- | --- |
 | [common-lib](#common-lib) | - | Shared utilities, exceptions, and DTOs |
 | [user-service](#user-service) | 8082 | User management, profiles, roles |
 | [order-service](#order-service) | 8081 | Order management, products |
@@ -94,7 +94,7 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
 ## Technology Stack
 
 | Component | Technology |
-|-----------|------------|
+| --- | --- |
 | Framework | Quarkus 3.34.1 |
 | Language | Java 21 |
 | Build Tool | Maven |
@@ -117,7 +117,7 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
 
 ## Project Structure
 
-```
+```text
 quar-kos/
 ├── common-lib/                      # Shared library
 │   ├── pom.xml
@@ -218,8 +218,9 @@ cd order-service && ./mvnw quarkus:dev
 ```
 
 Services will be available at:
-- **user-service**: http://localhost:8082
-- **order-service**: http://localhost:8081
+
+- **user-service**: <http://localhost:8082>
+- **order-service**: <http://localhost:8081>
 
 ---
 
@@ -228,20 +229,20 @@ Services will be available at:
 ### Environment Variables
 
 | Variable | Description | Required |
-|----------|-------------|----------|
+| --- | --- | --- |
 | `POSTGRES_DOCKER_PASSWORD` | PostgreSQL password | Yes |
 
 ### Service Ports
 
 | Service | Port |
-|---------|------|
+| --- | --- |
 | user-service | 8082 |
 | order-service | 8081 |
 
 ### Databases
 
 | Service | Database | Port |
-|---------|----------|------|
+| --- | --- | --- |
 | user-service | quar-kos-userdb | 5432 |
 | order-service | quar-kos-orderdb | 5433 |
 
@@ -254,7 +255,7 @@ Services will be available at:
 **Base URL**: `http://localhost:8082/api/users`
 
 | Method | Endpoint | Description | Request Body | Response |
-|--------|----------|-------------|--------------|----------|
+| --- | --- | --- | --- | --- |
 | `GET` | `/` | Get all users | - | `List<UserDTO>` |
 | `GET` | `/{id}` | Get user by ID | - | `UserDTO` or 404 |
 | `POST` | `/` | Create user | `CreateUserRequest` | `UserDTO` (201) |
@@ -265,12 +266,14 @@ Services will be available at:
 | `GET` | `/search` | Search users | Query params | `SearchResponse` |
 
 #### Search Parameters
+
 - `username`, `email`, `id` - Filter fields
 - `sortBy` (default: `created_at`)
 - `sortDirection` (default: `DESC`)
 - `limit` (default: 100), `offset` (default: 0)
 
 #### Example: Create User
+
 ```bash
 curl -X POST http://localhost:8082/api/users \
   -H "Content-Type: application/json" \
@@ -286,7 +289,7 @@ curl -X POST http://localhost:8082/api/users \
 #### Orders
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+| --- | --- | --- |
 | `POST` | `/orders` | Create order |
 | `GET` | `/orders` | Get all orders |
 | `GET` | `/orders/{id}` | Get order by ID |
@@ -294,6 +297,7 @@ curl -X POST http://localhost:8082/api/users \
 | `GET` | `/orders/search` | Search orders |
 
 **Search Parameters for Orders:**
+
 - `status`, `userId`, `username`
 - `minAmount`, `maxAmount`
 - `sortBy` (default: `created_at`), `sortDirection` (default: `DESC`)
@@ -302,18 +306,20 @@ curl -X POST http://localhost:8082/api/users \
 #### Products
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+| --- | --- | --- |
 | `GET` | `/products` | Get all products |
 | `GET` | `/products/{id}` | Get product by ID |
 | `GET` | `/products/search` | Search products |
 
 **Search Parameters for Products:**
+
 - `name`, `description`
 - `minPrice`, `maxPrice`, `stock`
 - `sortBy` (default: `id`), `sortDirection` (default: `DESC`)
 - `limit` (default: 100), `offset` (default: 0)
 
 #### Example: Create Order
+
 ```bash
 curl -X POST http://localhost:8081/api/orders \
   -H "Content-Type: application/json" \
@@ -333,6 +339,7 @@ curl -X POST http://localhost:8081/api/orders \
 ### Topic: `user-events`
 
 #### Event: USER_CREATED
+
 Published by user-service when a new user is created.
 
 ```json
@@ -347,6 +354,7 @@ Published by user-service when a new user is created.
 ```
 
 #### Event: USER_PROFILE_CREATED
+
 Published by user-service when a user profile is created.
 
 ```json
@@ -365,6 +373,7 @@ Published by user-service when a user profile is created.
 ### Event Handling (order-service)
 
 When order-service receives events:
+
 - **USER_CREATED**: Creates order with "Book Note" product
 - **USER_PROFILE_CREATED**: Creates order with "Key Chain" product
 
@@ -375,16 +384,18 @@ When order-service receives events:
 ### User Service Tables
 
 #### users
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | id | UUID | PRIMARY KEY |
 | username | VARCHAR(100) | NOT NULL, UNIQUE |
 | email | VARCHAR(255) | NOT NULL, UNIQUE |
 | created_at | TIMESTAMP | NOT NULL |
 
 #### user_profiles
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | id | UUID | PRIMARY KEY |
 | user_id | UUID | NOT NULL, UNIQUE, FK |
 | first_name | VARCHAR(100) | |
@@ -393,15 +404,17 @@ When order-service receives events:
 | address | TEXT | |
 
 #### roles
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | id | UUID | PRIMARY KEY |
 | name | VARCHAR(50) | NOT NULL, UNIQUE |
 | description | TEXT | |
 
 #### user_roles
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | user_id | UUID | FK |
 | role_id | UUID | FK |
 | assigned_at | TIMESTAMP | |
@@ -413,8 +426,9 @@ When order-service receives events:
 ### Order Service Tables
 
 #### orders
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | id | UUID | PRIMARY KEY |
 | user_id | UUID | NOT NULL |
 | username | VARCHAR(100) | |
@@ -424,8 +438,9 @@ When order-service receives events:
 | created_at | TIMESTAMP | |
 
 #### products
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | id | UUID | PRIMARY KEY |
 | name | VARCHAR(255) | NOT NULL |
 | description | TEXT | |
@@ -433,8 +448,9 @@ When order-service receives events:
 | stock | INTEGER | NOT NULL |
 
 #### order_items
+
 | Column | Type | Constraints |
-|--------|------|-------------|
+| --- | --- | --- |
 | id | UUID | PRIMARY KEY |
 | order_id | UUID | FK |
 | product_id | UUID | FK |
@@ -531,6 +547,7 @@ docker run -p 8081:8081 \
 Shared library providing common utilities across all services.
 
 **Key Components:**
+
 - **Exceptions**: `EntityNotFoundException`, `CreationFailedException`, `DataAccessException`, `KafkaException`
 - **DTOs**: `ErrorResponse`, `UserEvent`
 - **Utilities**: `CorrelationIdFilter`, `SqlQueryLoader`, `DynamicQueryBuilder`
@@ -543,6 +560,7 @@ Shared library providing common utilities across all services.
 Manages users, profiles, and roles.
 
 **Key Features:**
+
 - User CRUD operations
 - User profile management (one-to-one with users)
 - Role assignment (many-to-many)
@@ -558,6 +576,7 @@ Manages users, profiles, and roles.
 Manages orders, products, and order items.
 
 **Key Features:**
+
 - Order creation with multiple items
 - Product catalog management
 - Order status tracking
@@ -571,16 +590,19 @@ Manages orders, products, and order items.
 ## Troubleshooting
 
 ### Database Connection Issues
+
 1. Ensure PostgreSQL containers are running
 2. Verify correct ports are exposed
 3. Check `POSTGRES_DOCKER_PASSWORD` environment variable
 
 ### Kafka Connection Issues
+
 1. Ensure Kafka and Zookeeper are running
 2. Verify port 9092 is accessible
 3. Check if `user-events` topic exists
 
 ### Migration Failures
+
 ```bash
 # View Flyway history
 psql -h localhost -U postgres -d <database> -c "SELECT * FROM flyway_schema_history;"
