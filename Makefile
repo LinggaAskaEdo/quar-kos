@@ -1,3 +1,7 @@
+# ==============================================================================
+# Quar-Kos Microservices Makefile
+# ==============================================================================
+
 # Variables
 MAVEN := mvn
 MODULES := common-lib user-service order-service
@@ -7,151 +11,244 @@ QUARKUS := quarkus
 # Native build options
 NATIVE_OPTS := -Dnative -Dquarkus.native.enabled=true -Dquarkus.native.native-image-xmx=4g -DskipTests
 
-# ===== Targets =====
-.PHONY: clean-all clean-user clean-order build-all build-user build-order build-native build-native-all build-native-user build-native-order run-all run-user run-order run-native-all run-native-user run-native-order help
+# Parallel execution support
+NPROC ?= $(shell nproc 2>/dev/null || echo 4)
+MAKE_PARALLEL := -j$(NPROC)
 
-# ===== Main Commands =====
-# Clean all services
-clean-all:
-	@echo "🧹 Cleaning services..."
-	@for service in $(MODULES); do \
-		if [ -d "$$service" ]; then \
-			echo "  Cleaning $$service..."; \
-			(cd $$service && $(MAVEN) clean); \
-		fi \
-	done
+# Colors
+BLUE := $(shell printf '\033[0;34m')
+GREEN := $(shell printf '\033[0;32m')
+YELLOW := $(shell printf '\033[0;33m')
+NC := $(shell printf '\033[0m')
 
-clean-user:
-	@echo "Cleaning user-service..."
-	cd user-service && $(MAVEN) clean
+# ==============================================================================
+# Phony Targets Declaration
+# ==============================================================================
+.PHONY: all clean clean-all clean-% build build-all build-% build-native \
+        build-native-all build-native-% run run-all run-% run-native \
+        run-native-all run-native-% debug debug-% test test-all test-% \
+        upgrade upgrade-all help
 
-clean-order:
-	@echo "Cleaning order-service..."
-	cd order-service && $(MAVEN) clean
+# ==============================================================================
+# Helper Functions
+# ==============================================================================
+define run-maven
+	@printf "$(BLUE)$(1) $(2)...$(NC)\n"
+	@(cd $(2) && $(MAVEN) $(3) --batch-mode --show-version)
+endef
 
-clean-common:
-	@echo "Cleaning common-lib..."
-	cd common-lib && $(MAVEN) clean
+define run-service
+	@if [ -f "$(1)/target/quarkus-app/quarkus-run.jar" ]; then \
+		printf "$(GREEN)Starting $(1)...$(NC)\n"; \
+		cd $(1) && java -jar target/quarkus-app/quarkus-run.jar; \
+	else \
+		printf "$(YELLOW)No JAR found. Run 'make build' first.$(NC)\n"; \
+	fi
+endef
 
-# Build JVM versions
-build-all:
-	@echo "🔨 Building services (JVM)..."
-	@for service in $(MODULES); do \
-		if [ -d "$$service" ]; then \
-			echo "  Building $$service..."; \
-			(cd $$service && $(MAVEN) clean install -DskipTests); \
-		fi \
-	done
+define run-native
+	@if ls $(1)/target/*-runner 1>/dev/null 2>&1; then \
+		printf "$(GREEN)Starting $(1) native...$(NC)\n"; \
+		cd $(1) && ./target/*-runner; \
+	else \
+		printf "$(YELLOW)No native executable. Run 'make build-native' first.$(NC)\n"; \
+	fi
+endef
 
-build-user:
-	@echo "🔨 Building user-service (JVM)..."
-	cd user-service && $(MAVEN) clean install -DskipTests
+# ==============================================================================
+# Default Target
+# ==============================================================================
+.DEFAULT_GOAL := help
 
-build-order:
-	@echo "🔨 Building order-service (JVM)..."
-	cd order-service && $(MAVEN) clean install -DskipTests
+# ==============================================================================
+# Build Targets
+# ==============================================================================
+all: build
+
+build: build-all
+
+build-all: build-common build-services
 
 build-common:
-	@echo "🔨 Building common library (JVM)..."
-	cd common-lib && $(MAVEN) clean install -DskipTests
+	$(call run-maven,🔨 Building common library,common-lib,clean install -DskipTests)
 
-# Build native executables
+build-services:
+	@printf "$(BLUE)🔨 Building services (JVM)...$(NC)\n"
+	@for service in $(SERVICES); do \
+		if [ -d "$$service" ]; then \
+			printf "  $(GREEN)Building $$service...$(NC)\n"; \
+			(cd $$service && $(MAVEN) clean install -DskipTests --batch-mode); \
+		fi \
+	done
+
+build-%:
+	@printf "$(BLUE)🔨 Building $*...$(NC)\n"
+	$(call run-maven,🔨 Building,$*-service,clean install -DskipTests)
+
+# ==============================================================================
+# Native Build Targets
+# ==============================================================================
+build-native: build-native-all
+
 build-native-all:
-	@echo "⚡ Building native executables..."
+	@echo "$(BLUE)⚡ Building native executables...$(NC)"
 	@for service in $(SERVICES); do \
 		if [ -d "$$service" ]; then \
-			echo "  Building $$service..."; \
-			(cd $$service && $(MAVEN) clean package $(NATIVE_OPTS)); \
+			echo "  $(GREEN)Building $$service native...$(NC)"; \
+			(cd $$service && $(MAVEN) clean package $(NATIVE_OPTS) --batch-mode); \
 		fi \
 	done
 
-build-native-user:
-	@echo "⚡ Building user-service native executables..."
-	cd user-service && $(MAVEN) clean package $(NATIVE_OPTS)
+build-native-%:
+	@printf "$(BLUE)⚡ Building $* native...$(NC)\n"
+	$(call run-maven,⚡ Building,$*-service,clean package $(NATIVE_OPTS))
 
-build-native-order:
-	@echo "⚡ Building order-service native executables..."
-	cd order-service && $(MAVEN) clean package $(NATIVE_OPTS)
+# ==============================================================================
+# Clean Targets
+# ==============================================================================
+clean: clean-all
 
-# Run JVM services
+clean-all:
+	@echo "$(BLUE)🧹 Cleaning all modules...$(NC)"
+	@for module in $(MODULES); do \
+		if [ -d "$$module" ]; then \
+			echo "  $(GREEN)Cleaning $$module...$(NC)"; \
+			(cd $$module && $(MAVEN) clean --batch-mode); \
+		fi \
+	done
+
+clean-%:
+	@printf "$(BLUE)🧹 Cleaning $*...$(NC)\n"
+	@if [ -d "$*-service" ]; then \
+		$(call run-maven,🧹 Cleaning,$*-service,clean); \
+	elif [ -d "$*-lib" ]; then \
+		$(call run-maven,🧹 Cleaning,$*-lib,clean); \
+	else \
+		printf "$(YELLOW)Module $* not found$(NC)\n"; \
+	fi
+
+# ==============================================================================
+# Run Targets
+# ==============================================================================
+run: run-all
+
 run-all:
-	@echo "🚀 Running services (JVM)..."
-	@echo "Start each service in separate terminal:"
+	@echo "$(GREEN)🚀 Services ready to run (JVM)$(NC)"
+	@echo ""
+	@echo "Run each service in separate terminals:"
 	@for service in $(SERVICES); do \
 		if [ -d "$$service" ]; then \
-			echo "  $$service: (cd $$service && java -jar target/quarkus-app/quarkus-run.jar)"; \
+			echo "  $(BLUE)$$service:$(NC) make run-$$service"; \
 		fi \
 	done
 
-debug-user:
-	@echo "🐞 Debugging user-service (JVM)..."
-	cd user-service && ./mvnw quarkus:dev
+run-%:
+	$(call run-service,$*)
 
-debug-order:
-	@echo "🐞 Debugging order-service (JVM)..."
-	cd order-service && ./mvnw quarkus:dev
+run-native: run-native-all
 
-run-user:
-	@echo "🚀 Running user-services (JVM)..."
-	cd user-service && java -jar target/quarkus-app/quarkus-run.jar
-
-run-order:
-	@echo "🚀 Running order-services (JVM)..."
-	cd order-service && java -jar target/quarkus-app/quarkus-run.jar
-
-# Run native executables
 run-native-all:
-	@echo "⚡ Running native executables..."
-	@echo "Start each service in separate terminal:"
+	@echo "$(GREEN)⚡ Native executables ready$(NC)"
+	@echo ""
+	@echo "Run each service in separate terminals:"
 	@for service in $(SERVICES); do \
 		if [ -d "$$service" ]; then \
 			if ls $$service/target/*-runner 1>/dev/null 2>&1; then \
-				echo "  $$service: (cd $$service && ./target/*-runner)"; \
+				echo "  $(BLUE)$$service:$(NC) make run-native-$$service"; \
 			else \
-				echo "  $$service: No native executable found. Run 'make build-native-all' first."; \
+				echo "  $(YELLOW)$$service:$(NC) No native executable. Run 'make build-native-$$service'"; \
 			fi \
 		fi \
 	done
 
-run-native-user:
-	@echo "⚡ Running user-service native executables..."
-	cd user-service && ./target/*-runner
+run-native-%:
+	$(call run-native,$*)
 
-run-native-order:
-	@echo "⚡ Running order-service native executables..."
-	cd order-service && ./target/*-runner
+# ==============================================================================
+# Debug Targets
+# ==============================================================================
+debug: debug-user debug-order
 
-upgrade-all:
-	@echo "🔨 Building services (JVM)..."
-	@for service in $(MODULES); do \
-		if [ -d "$$service" ]; then \
-			echo "  Building $$service..."; \
-			(cd $$service && ${QUARKUS} update -y); \
+debug-%:
+	@echo "$(GREEN)🐞 Debugging $*...$(NC)"
+	cd $* && ./mvnw quarkus:dev
+
+# ==============================================================================
+# Test Targets
+# ==============================================================================
+test: test-all
+
+test-all:
+	@echo "$(BLUE)🧪 Running all tests...$(NC)"
+	@for module in $(MODULES); do \
+		if [ -d "$$module" ]; then \
+			echo "  $(GREEN)Testing $$module...$(NC)"; \
+			(cd $$module && $(MAVEN) test --batch-mode); \
 		fi \
 	done
 
-# ===== Help =====
-help:
-	@echo "📦 Quarkus Services Makefile"
-	@echo ""
-	@echo "Commands:"
-	@echo "  clean-all     		- Clean all services"
-	@echo "  build-all         	- Build JVM versions"
-	@echo "  build-native-all   - Build native executables"
-	@echo "  run-all            - Show commands to run JVM services"
-	@echo "  run-native-all     - Show commands to run native services"
-	@echo ""
-	@echo "Individual builds:"
-	@echo "  user			- Build only user-service (JVM)"
-	@echo "  order      	- Build only order-service (JVM)"
-	@echo "  native-user 	- Build user-service native"
-	@echo "  native-order 	- Build order-service native"
-	@echo ""
-	@echo "Examples:"
-	@echo "  make clean-all build-native-all	# Build all native"
-	@echo "  make build-native-user   			# Build user service native"
-	@echo "  make run-native-all            	# Run all native services"
-	@echo "  make run-native-user           	# Run native user services"
+test-%:
+	@printf "$(BLUE)🧪 Testing $*...$(NC)\n"
+	@if [ -d "$*-service" ]; then \
+		$(call run-maven,🧪 Testing,$*-service,test); \
+	elif [ -d "$*-lib" ]; then \
+		$(call run-maven,🧪 Testing,$*-lib,test); \
+	else \
+		printf "$(YELLOW)Module $* not found$(NC)\n"; \
+	fi
 
-# Default target
-.DEFAULT_GOAL := help
+# ==============================================================================
+# Upgrade Targets
+# ==============================================================================
+upgrade: upgrade-all
+
+upgrade-all:
+	@echo "$(BLUE)🔄 Updating Quarkus dependencies...$(NC)"
+	@for module in $(MODULES); do \
+		if [ -d "$$module" ]; then \
+			echo "  $(GREEN)Updating $$module...$(NC)"; \
+			(cd $$module && $(QUARKUS) update -y); \
+		fi \
+	done
+
+# ==============================================================================
+# Help Target
+# ==============================================================================
+help:
+	@echo ""
+	@echo "$(GREEN)📦 Quar-Kos Microservices - Makefile Commands$(NC)"
+	@echo ""
+	@echo "$(BLUE)Build Commands:$(NC)"
+	@echo "  make build              - Build all modules (common-lib + services)"
+	@echo "  make build-common       - Build common library only"
+	@echo "  make build-<service>    - Build specific service (user, order)"
+	@echo "  make build-native       - Build native executables for all services"
+	@echo "  make build-native-<svc> - Build native executable for specific service"
+	@echo ""
+	@echo "$(BLUE)Clean Commands:$(NC)"
+	@echo "  make clean              - Clean all modules"
+	@echo "  make clean-<module>     - Clean specific module"
+	@echo ""
+	@echo "$(BLUE)Run Commands:$(NC)"
+	@echo "  make run                - Show run instructions"
+	@echo "  make run-<service>      - Run specific service (JVM)"
+	@echo "  make run-native         - Show run native instructions"
+	@echo "  make run-native-<svc>   - Run specific service native executable"
+	@echo ""
+	@echo "$(BLUE)Debug Commands:$(NC)"
+	@echo "  make debug-<service>    - Debug specific service with Quarkus dev mode"
+	@echo ""
+	@echo "$(BLUE)Test Commands:$(NC)"
+	@echo "  make test               - Run tests for all modules"
+	@echo "  make test-<module>      - Run tests for specific module"
+	@echo ""
+	@echo "$(BLUE)Upgrade Commands:$(NC)"
+	@echo "  make upgrade            - Update Quarkus dependencies"
+	@echo ""
+	@echo "$(BLUE)Examples:$(NC)"
+	@echo "  make clean build                          # Clean and build all"
+	@echo "  make build-native-user                    # Build user service native"
+	@echo "  make run-user                             # Run user service"
+	@echo "  make test                                 # Run all tests"
+	@echo "  make clean build-native-all run-native    # Full native build & run"
+	@echo ""

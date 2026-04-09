@@ -16,6 +16,7 @@ A microservice-based application for user and order management built with Quarku
 - [Kafka Events](#kafka-events)
 - [Building](#building)
 - [Testing](#testing)
+- [Makefile Commands](#makefile-commands)
 - [Docker](#docker)
 
 ---
@@ -95,7 +96,7 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
 
 | Component | Technology |
 | --- | --- |
-| Framework | Quarkus 3.34.2 |
+| Framework | Quarkus 3.34.3 |
 | Language | Java 21 |
 | Build Tool | Maven |
 | Database | PostgreSQL 15 |
@@ -197,24 +198,25 @@ export POSTGRES_DOCKER_PASSWORD=postgres
 ### 3. Build All Modules
 
 ```bash
-# Build common-lib first
-cd common-lib && ./mvnw clean install -DskipTests && cd ..
+# Using Makefile (recommended)
+make clean build
 
-# Build user-service
-cd user-service && ./mvnw clean package -DskipTests && cd ..
-
-# Build order-service
-cd order-service && ./mvnw clean package -DskipTests && cd ..
+# Or build individual modules
+make build-common
+make build-user
+make build-order
 ```
 
 ### 4. Run Services
 
 ```bash
-# Terminal 1 - Start user-service
-cd user-service && ./mvnw quarkus:dev
+# Using Makefile (recommended)
+make run-user     # Terminal 1
+make run-order    # Terminal 2
 
-# Terminal 2 - Start order-service
-cd order-service && ./mvnw quarkus:dev
+# Or using Quarkus dev mode
+make debug-user   # Terminal 1 (with hot reload)
+make debug-order  # Terminal 2 (with hot reload)
 ```
 
 Services will be available at:
@@ -463,45 +465,59 @@ When order-service receives events:
 
 ## Building
 
-### Build All Modules
+### Quick Commands
 
 ```bash
-# Using Makefile
-make all
-
-# Or manually
-cd common-lib && ./mvnw clean install -DskipTests
-cd user-service && ./mvnw clean package -DskipTests
-cd order-service && ./mvnw clean package -DskipTests
-```
-
-### Build Individual Module
-
-```bash
-cd <module> && ./mvnw clean package
+make clean build              # Clean and build all modules
+make build                    # Build all modules (without clean)
+make build-common             # Build common library only
+make build-user               # Build user service only
+make build-order              # Build order service only
+make build-native             # Build native executables for all services
+make build-native-user        # Build user service native executable
+make build-native-order       # Build order service native executable
 ```
 
 ### Run Packaged Application
 
 ```bash
-java -jar <module>/target/quarkus-app/quarkus-run.jar
+# Using Makefile (recommended)
+make run-user
+make run-order
+
+# Or manually
+java -jar user-service/target/quarkus-app/quarkus-run.jar
+java -jar order-service/target/quarkus-app/quarkus-run.jar
+```
+
+### Native Executables
+
+```bash
+# Build all native executables
+make build-native
+
+# Run native executables
+make run-native-user
+make run-native-order
 ```
 
 ---
 
 ## Testing
 
-### Run Tests for All Modules
+### Run Tests
 
 ```bash
-# common-lib
-cd common-lib && ./mvnw test && cd ..
+# Using Makefile (recommended)
+make test                     # Run tests for all modules
+make test-common              # Test common library only
+make test-user                # Test user service only
+make test-order               # Test order service only
 
-# user-service
-cd user-service && ./mvnw test && cd ..
-
-# order-service
-cd order-service && ./mvnw test && cd ..
+# Or manually
+cd common-lib && ./mvnw test
+cd user-service && ./mvnw test
+cd order-service && ./mvnw test
 ```
 
 ### Run Tests with Coverage
@@ -509,6 +525,65 @@ cd order-service && ./mvnw test && cd ..
 ```bash
 ./mvnw test jacoco:report
 ```
+
+---
+
+## Makefile Commands
+
+The project includes an optimized Makefile for common development tasks. Run `make help` to see all available commands.
+
+### Build Commands
+
+| Command | Description |
+| --- | --- |
+| `make build` | Build all modules (common-lib + services) |
+| `make build-common` | Build common library only |
+| `make build-user` | Build user service only |
+| `make build-order` | Build order service only |
+| `make build-native` | Build native executables for all services |
+| `make build-native-user` | Build user service native executable |
+| `make build-native-order` | Build order service native executable |
+
+### Clean Commands
+
+| Command | Description |
+| --- | --- |
+| `make clean` | Clean all modules |
+| `make clean-common` | Clean common library only |
+| `make clean-user` | Clean user service only |
+| `make clean-order` | Clean order service only |
+
+### Run Commands
+
+| Command | Description |
+| --- | --- |
+| `make run-user` | Run user service (JVM) |
+| `make run-order` | Run order service (JVM) |
+| `make run-native-user` | Run user service native executable |
+| `make run-native-order` | Run order service native executable |
+
+### Debug Commands
+
+| Command | Description |
+| --- | --- |
+| `make debug-user` | Debug user service with Quarkus dev mode (hot reload) |
+| `make debug-order` | Debug order service with Quarkus dev mode (hot reload) |
+
+### Test Commands
+
+| Command | Description |
+| --- | --- |
+| `make test` | Run tests for all modules |
+| `make test-common` | Test common library only |
+| `make test-user` | Test user service only |
+| `make test-order` | Test order service only |
+
+### Other Commands
+
+| Command | Description |
+| --- | --- |
+| `make help` | Show all available commands |
+| `make upgrade` | Update Quarkus dependencies to latest versions |
 
 ---
 
