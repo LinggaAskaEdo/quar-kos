@@ -96,7 +96,7 @@ Quar-Kos is a distributed system consisting of microservices for managing users 
 
 | Component | Technology |
 | --- | --- |
-| Framework | Quarkus 3.34.3 |
+| Framework | Quarkus 3.34.5 |
 | Language | Java 21 |
 | Build Tool | Maven |
 | Database | PostgreSQL 15 |
